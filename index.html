@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de Ventas 2025</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- D3.js v7 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <!-- Overlay de carga -->
+  <div id="loading-overlay" style="
+    position: fixed; inset: 0; background: #f9fafb;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9998; font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px; color: #6b7280; flex-direction: column; gap: 12px;
+  ">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="animation: spin 1s linear infinite;">
+      <circle cx="18" cy="18" r="15" stroke="#e5e7eb" stroke-width="3"/>
+      <path d="M18 3 A15 15 0 0 1 33 18" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span>Cargando dashboard...</span>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  </div>
+
+  <!-- Tooltip global (compartido por todos los gráficos) -->
+  <div id="global-tooltip" class="d3-tooltip"></div>
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <header class="dashboard-header">
+    <h1>Dashboard de Ventas 2025</h1>
+    <span class="header-meta">Datos: Ene–Dic 2025 &nbsp;|&nbsp; Actualizado: <span id="update-date">—</span></span>
+  </header>
+
+  <!-- ── Main ───────────────────────────────────────────────── -->
+  <main class="dashboard-main" id="dashboard-main" style="opacity:0; transition: opacity .4s ease;">
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECCIÓN 1 — RESUMEN EJECUTIVO
+         ══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Resumen Ejecutivo</h2>
+
+      <div class="row row-1">
+        <div class="card" style="padding: 16px 24px;">
+          <div id="viz-1">
+            <div class="loading-msg">Cargando KPIs...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECCIÓN 2 — DESEMPEÑO POR REPRESENTANTE Y REGIÓN
+         ══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Desempeño por Representante y Región</h2>
+
+      <!-- Dot Plot — ancho completo para que ambas dimensiones sean legibles -->
+      <div class="row row-1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Laura Gómez lidera en ambos KPIs — Sofía y Carlos no alcanzan benchmarks</div>
+            <div class="card-subtitle">Promedio anual de KPI Meta y KPI Conversión por representante &nbsp;·&nbsp; Tamaño del punto = Revenue</div>
+          </div>
+          <div id="viz-2" class="chart-container">
+            <div class="loading-msg">Cargando gráfico...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bullet Chart — ancho completo para que las barras y etiquetas sean legibles -->
+      <div class="row row-1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Centro y Norte superan su target — Sur, Este y Oeste están por debajo de la línea</div>
+            <div class="card-subtitle">Revenue real vs target por región (barra + marca) &nbsp;·&nbsp; Color = estado KPI Meta &nbsp;·&nbsp; Línea negra = target asignado</div>
+          </div>
+          <div id="viz-3" class="chart-container">
+            <div class="loading-msg">Cargando gráfico...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heatmap — ancho completo: 5 reps × 12 meses necesita toda la pantalla -->
+      <div class="row row-1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Carlos Ruiz acumula 3 meses en amarillo — Miguel y Sofía con picos rojos en Q2–Q3</div>
+            <div class="card-subtitle">Semáforo de KPI Meta (fondo de celda) × Representante × Mes &nbsp;·&nbsp; Símbolo = estado KPI Conversión</div>
+          </div>
+          <div id="viz-5" class="chart-container">
+            <div class="loading-msg">Cargando heatmap...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECCIÓN 3 — EVOLUCIÓN TEMPORAL
+         ══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Evolución Temporal</h2>
+
+      <div class="row row-1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Q3 fue el mejor trimestre (104% meta, 27.9% conv.) — Q4 mantiene el impulso sobre benchmark</div>
+            <div class="card-subtitle">Evolución trimestral de KPI Meta (azul, eje izq.) y KPI Conversión (violeta, eje der.) &nbsp;·&nbsp; Zona verde = sobre meta 100%</div>
+          </div>
+          <div id="viz-4" class="chart-container">
+            <div class="loading-msg">Cargando gráfico...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECCIÓN 4 — CORRELACIÓN Y DISTRIBUCIÓN
+         ══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Correlación y Distribución</h2>
+
+      <div class="row row-1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Fuerte correlación leads–conversión (r≈0.94) — REC-011 y REC-005 son críticos por baja eficiencia de cierre, no por volumen</div>
+            <div class="card-subtitle">Leads vs Tasa de Conversión &nbsp;·&nbsp; Tamaño = Revenue &nbsp;·&nbsp; Color = Representante (paleta Okabe-Ito, accesible) &nbsp;·&nbsp; Contorno rojo grueso = registro crítico &nbsp;·&nbsp; Línea = regresión OLS</div>
+          </div>
+          <div id="viz-6" class="chart-container">
+            <div class="loading-msg">Cargando gráfico...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECCIÓN 5 — ALERTAS Y REGISTROS CRÍTICOS
+         ══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Alertas y Registros Críticos</h2>
+
+      <div class="row row-1">
+        <div class="card">
+          <div id="viz-7">
+            <div class="loading-msg">Cargando alertas...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Scripts de gráficos (en orden, IIFE que registran en window.Charts) -->
+  <script src="js/charts/alerts_table.js"></script>
+  <script src="js/charts/heatmap.js"></script>
+  <script src="js/charts/dot_plot.js"></script>
+  <script src="js/charts/line_chart.js"></script>
+  <script src="js/charts/bullet_chart.js"></script>
+  <script src="js/charts/scatter.js"></script>
+  <script src="js/charts/bans.js"></script>
+
+  <!-- Coordinador principal -->
+  <script src="js/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,524 @@
+/* ============================================================
+   Dashboard de Ventas 2025 — Estilos principales
+   Paleta: Verde #2d7d46 | Amarillo #b45309 | Rojo #991b1b
+   Neutro: #374151 | Fondo: #f9fafb | Tarjetas: #ffffff
+   Acento: #1d4ed8
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-green: #2d7d46;
+  --color-green-bg: #dcfce7;
+  --color-green-text: #15803d;
+  --color-yellow: #b45309;
+  --color-yellow-bg: #fef3c7;
+  --color-yellow-text: #b45309;
+  --color-red: #991b1b;
+  --color-red-bg: #fee2e2;
+  --color-red-text: #b91c1c;
+  --color-neutral: #374151;
+  --color-bg: #f9fafb;
+  --color-card: #ffffff;
+  --color-accent: #1d4ed8;
+  --color-border: #e5e7eb;
+  --color-text-muted: #6b7280;
+  --color-text-secondary: #4b5563;
+
+  /* Semaforo inline (mas saturados para legibilidad) */
+  --sem-green-val: #10b981;
+  --sem-yellow-val: #f59e0b;
+  --sem-red-val: #ef4444;
+
+  /* Spacing system — 8pt base */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+}
+
+html, body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-neutral);
+  font-size: 14px;
+  line-height: 1.5;
+  min-width: 1280px;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.dashboard-header {
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 var(--space-6);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.dashboard-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-neutral);
+  letter-spacing: -0.3px;
+}
+
+.header-meta {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Main layout ──────────────────────────────────────────── */
+.dashboard-main {
+  padding: var(--space-4) var(--space-6);
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── Thematic sections ────────────────────────────────────── */
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-1);
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* ── Grid rows ────────────────────────────────────────────── */
+.row {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.row-1 {
+  grid-template-columns: 1fr;
+}
+
+.row-2 {
+  grid-template-columns: 4fr 5fr 3fr;
+}
+
+.row-3 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.row-4 {
+  grid-template-columns: 1fr;
+}
+
+/* ── Cards ────────────────────────────────────────────────── */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3);
+  overflow: hidden;
+}
+
+.card-header {
+  margin-bottom: var(--space-2);
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral);
+  line-height: 1.3;
+}
+
+.card-subtitle {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ── VIZ-1 BANs ───────────────────────────────────────────── */
+#bans-container {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  flex-wrap: nowrap;
+}
+
+.ban-card {
+  flex: 1;
+  background: var(--color-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.ban-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.ban-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-neutral);
+  letter-spacing: -1px;
+}
+
+.ban-value.green  { color: var(--color-green-text); }
+.ban-value.yellow { color: var(--color-yellow-text); }
+.ban-value.red    { color: var(--color-red-text); }
+
+.ban-sublabel {
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--color-text-muted);
+}
+
+.ban-sublabel.positive { color: var(--color-green-text); font-weight: 500; }
+.ban-sublabel.warning  { color: var(--color-yellow-text); font-weight: 500; }
+.ban-sublabel.danger   { color: var(--color-red-text); font-weight: 500; }
+
+/* Badge de estado global */
+.status-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+  min-width: 140px;
+}
+
+.status-badge.yellow {
+  background: var(--color-yellow-bg);
+  border-color: #fde68a;
+}
+
+.status-badge.green {
+  background: var(--color-green-bg);
+  border-color: #bbf7d0;
+}
+
+.status-badge.red {
+  background: var(--color-red-bg);
+  border-color: #fecaca;
+}
+
+.status-badge-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.status-badge-text {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.status-badge.yellow .status-badge-text { color: var(--color-yellow); }
+.status-badge.green  .status-badge-text { color: var(--color-green); }
+.status-badge.red    .status-badge-text { color: var(--color-red); }
+
+.status-badge-label {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ── Chart containers ─────────────────────────────────────── */
+.chart-container {
+  width: 100%;
+}
+
+/* ── Tooltip (global) ─────────────────────────────────────── */
+.d3-tooltip {
+  position: fixed;
+  background: rgba(17, 24, 39, 0.95);
+  color: #f9fafb;
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: 9999;
+  max-width: 240px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  white-space: nowrap;
+  display: none;
+}
+
+.d3-tooltip.visible {
+  display: block;
+}
+
+.d3-tooltip strong {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.d3-tooltip .tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.d3-tooltip .tooltip-val {
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+/* ── SVG base styles ─────────────────────────────────────── */
+.chart-svg text {
+  font-family: var(--font);
+  fill: var(--color-neutral);
+}
+
+.chart-svg .axis text {
+  font-size: 11px;
+  fill: var(--color-text-secondary);
+}
+
+.chart-svg .axis path,
+.chart-svg .axis line {
+  stroke: var(--color-border);
+}
+
+.chart-svg .axis .domain {
+  display: none;
+}
+
+.chart-svg .grid line {
+  stroke: var(--color-border);
+  stroke-dasharray: 2,3;
+}
+
+.chart-svg .grid .domain {
+  display: none;
+}
+
+/* ── VIZ-7 Alerts table ───────────────────────────────────── */
+.alerts-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-2);
+}
+
+.alerts-badge {
+  background: var(--sem-red-val);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+.alerts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.alerts-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.alerts-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.alerts-table tr:last-child td {
+  border-bottom: none;
+}
+
+.alerts-table tr.worst-row td {
+  background: #fecaca;
+}
+
+.kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.kpi-badge.red {
+  background: var(--color-red-bg);
+  color: var(--color-red-text);
+}
+
+.kpi-badge.yellow {
+  background: var(--color-yellow-bg);
+  color: var(--color-yellow-text);
+}
+
+.gap-bar-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gap-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sem-red-val);
+  white-space: nowrap;
+  min-width: 58px;
+}
+
+.gap-bar-track {
+  flex: 1;
+  background: #f3f4f6;
+  border-radius: 2px;
+  height: 6px;
+  min-width: 40px;
+  overflow: hidden;
+}
+
+.gap-bar-fill {
+  height: 100%;
+  background: var(--sem-red-val);
+  border-radius: 2px;
+}
+
+/* ── VIZ-5 Heatmap legend ─────────────────────────────────── */
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.heatmap-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.heatmap-legend-cell {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+}
+
+/* ── Loading / error states ───────────────────────────────── */
+.loading-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: var(--color-red-text);
+  font-size: 13px;
+  background: var(--color-red-bg);
+  border-radius: var(--radius);
+}
+
+/* ── Dot plot sub-section labels ──────────────────────────── */
+.dot-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  fill: var(--color-text-muted);
+}
+
+/* ── Line chart annotation ────────────────────────────────── */
+.annotation-text {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-green-text);
+}
+
+/* ── Scatter legend ───────────────────────────────────────── */
+.scatter-legend text {
+  font-size: 11px;
+  fill: var(--color-text-secondary);
+}
+
+/* ── Responsive (colapso a columna unica) ─────────────────── */
+@media (max-width: 1280px) {
+  html, body { min-width: 900px; }
+
+  .row-2,
+  .row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-main {
+    padding: var(--space-3) var(--space-4);
+  }
+}

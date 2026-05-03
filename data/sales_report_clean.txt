@@ -1,0 +1,186 @@
+================================================================================
+  SALES PERFORMANCE REPORT — 2025 (Q1 a Q4)
+  Dataset: Sales Performance Report | Periodo: 2025-01 a 2025-12
+  Representantes: 5 | Regiones: 5 | Total de registros: 25
+  Generado: 2026-04-28
+================================================================================
+
+  KPI 1: Tasa de Cumplimiento de Meta = (revenue / target) * 100
+          Benchmark: 100% | [>=100 VERDE] [>=80 AMARILLO] [<80 ROJO]
+
+  KPI 2: Tasa de Conversion = (deals_closed / leads) * 100
+          Benchmark: 25%  | [>=25 VERDE] [>=15 AMARILLO] [<15 ROJO]
+
+================================================================================
+  REGISTROS DETALLADOS — ORDENADOS POR PERIODO
+================================================================================
+
+  LEYENDA DE ESTADO: [G] = VERDE (sobre meta)  [A] = AMARILLO (en riesgo)  [R] = ROJO (CRITICO)
+
+--------------------------------------------------------------------------------
+ ID       PERIODO  Q   REPRESENTANTE      REGION   REVENUE     TARGET     LEADS  DEALS  KPI-META   EST  KPI-CONV   EST
+--------------------------------------------------------------------------------
+ REC-001  2025-01  Q1  Ana Martinez       Norte    $142,000   $130,000      80     24    109.2%   [G]   30.0%   [G]
+ REC-002  2025-01  Q1  Carlos Ruiz        Sur       $98,000   $120,000      65     12     81.7%   [A]   18.5%   [A]
+ REC-003  2025-01  Q1  Laura Gomez        Centro   $175,000   $150,000      95     31    116.7%   [G]   32.6%   [G]
+ REC-004  2025-02  Q1  Ana Martinez       Norte    $118,000   $130,000      72     19     90.8%   [A]   26.4%   [G]
+!REC-005  2025-02  Q1  Carlos Ruiz        Sur       $74,000   $120,000      58      8     61.7%   [R]   13.8%   [R]  << CRITICO
+ REC-006  2025-02  Q1  Miguel Torres      Este     $161,000   $140,000      88     26    115.0%   [G]   29.5%   [G]
+ REC-007  2025-03  Q1  Laura Gomez        Centro   $193,000   $150,000     102     38    128.7%   [G]   37.3%   [G]
+ REC-008  2025-03  Q1  Sofia Herrera      Oeste     $89,000   $110,000      60     10     80.9%   [A]   16.7%   [A]
+ REC-009  2025-04  Q2  Ana Martinez       Norte    $155,000   $135,000      90     28    114.8%   [G]   31.1%   [G]
+ REC-010  2025-04  Q2  Carlos Ruiz        Sur      $102,000   $125,000      70     14     81.6%   [A]   20.0%   [A]
+!REC-011  2025-04  Q2  Miguel Torres      Este      $67,000   $140,000      45      6     47.9%   [R]   13.3%   [R]  << CRITICO
+ REC-012  2025-05  Q2  Sofia Herrera      Oeste    $131,000   $115,000      78     22    113.9%   [G]   28.2%   [G]
+ REC-013  2025-05  Q2  Laura Gomez        Centro   $148,000   $155,000      85     20     95.5%   [A]   23.5%   [A]
+ REC-014  2025-06  Q2  Ana Martinez       Norte    $168,000   $135,000      94     33    124.4%   [G]   35.1%   [G]
+ REC-015  2025-06  Q2  Carlos Ruiz        Sur      $110,000   $125,000      68     17     88.0%   [A]   25.0%   [G]
+ REC-016  2025-07  Q3  Miguel Torres      Este     $152,000   $145,000      83     24    104.8%   [G]   28.9%   [G]
+!REC-017  2025-07  Q3  Sofia Herrera      Oeste     $79,000   $115,000      52      7     68.7%   [R]   13.5%   [R]  << CRITICO
+ REC-018  2025-08  Q3  Laura Gomez        Centro   $207,000   $160,000     110     42    129.4%   [G]   38.2%   [G]
+ REC-019  2025-08  Q3  Ana Martinez       Norte    $133,000   $135,000      76     20     98.5%   [A]   26.3%   [G]
+ REC-020  2025-09  Q3  Carlos Ruiz        Sur      $136,000   $130,000      74     21    104.6%   [G]   28.4%   [G]
+ REC-021  2025-09  Q3  Miguel Torres      Este     $171,000   $145,000      91     29    117.9%   [G]   31.9%   [G]
+ REC-022  2025-10  Q4  Sofia Herrera      Oeste    $124,000   $120,000      69     18    103.3%   [G]   26.1%   [G]
+ REC-023  2025-10  Q4  Laura Gomez        Centro   $185,000   $160,000      98     35    115.6%   [G]   35.7%   [G]
+!REC-024  2025-11  Q4  Ana Martinez       Norte     $91,000   $140,000      55      9     65.0%   [R]   16.4%   [A]  << CRITICO
+ REC-025  2025-12  Q4  Carlos Ruiz        Sur      $178,000   $140,000     100     32    127.1%   [G]   32.0%   [G]
+--------------------------------------------------------------------------------
+  Total registros VERDES  (ambos KPI): 13 de 25
+  Total registros CRITICOS (al menos un KPI rojo): 4 de 25
+    -> REC-005: Carlos Ruiz / Sur / Feb (Meta 61.7% | Conv 13.8%)
+    -> REC-011: Miguel Torres / Este / Abr (Meta 47.9% | Conv 13.3%)
+    -> REC-017: Sofia Herrera / Oeste / Jul (Meta 68.7% | Conv 13.5%)
+    -> REC-024: Ana Martinez / Norte / Nov (Meta 65.0% | Conv 16.4%)
+
+
+================================================================================
+  RESUMEN POR REPRESENTANTE DE VENTAS
+================================================================================
+
+                         ---- REVENUE ----   --- META KPI ---   -- CONV KPI --   REGISTROS
+  REPRESENTANTE          TOTAL      VS META   PROM(%)  EST.GEN  PROM(%)  EST.GEN  [G] [A] [R]
+  -----------------------------------------------------------------------------------------
+  Laura Gomez          $908,000  +$133,000   117.2%   VERDE    33.5%   VERDE     4   1   0
+  Ana Martinez         $807,000  +$137,000   100.5%   VERDE    27.0%   VERDE     2   2   1
+  Carlos Ruiz          $598,000  -$37,000     89.0%   AMARILLO 23.5%   AMARILLO  2   2   1
+  Miguel Torres        $551,000  -$19,000     96.4%   AMARILLO 26.0%   VERDE     3   0   1
+  Sofia Herrera        $423,000  -$37,000     91.7%   AMARILLO 21.1%   AMARILLO  2   1   1
+  -----------------------------------------------------------------------------------------
+  TOTAL GENERAL      $3,287,000  +$177,000   98.9%    AMARILLO 26.3%   VERDE    13   6   4
+
+  NOTAS POR REPRESENTANTE:
+  * Laura Gomez   — Mejor performer del equipo. Meta y conversion sostenidamente verdes.
+                    Revenue +17% sobre target. Sin registros criticos en el ano.
+  * Ana Martinez  — Inicio solido pero caida grave en Nov (REC-024, Meta 65%, Critico).
+                    Promedio anual sostenido por Q1 y Q2 fuertes.
+  * Carlos Ruiz   — Inicio critico en Feb (REC-005, Meta 61.7%), recuperacion progresiva.
+                    Cierra el ano en verde (Dic: 127.1%). Trayectoria ascendente.
+  * Miguel Torres — Caida severa en Abr (REC-011, Meta 47.9%, peor registro del dataset).
+                    Recuperacion solida en Q3. Solo 4 registros (ausente en varios meses).
+  * Sofia Herrera — Inestable. Jul critico (REC-017). Recuperacion en Q4 (Oct: 103.3%).
+                    Conversion promedio por debajo del benchmark en el ano.
+
+
+================================================================================
+  RESUMEN POR REGION
+================================================================================
+
+                    ---- REVENUE ----   --- META KPI ---   -- CONV KPI --   REGISTROS
+  REGION            TOTAL      VS META   PROM(%)  EST.GEN  PROM(%)  EST.GEN  [G] [A] [R]
+  ---------------------------------------------------------------------------------------
+  Centro           $908,000  +$133,000   117.2%   VERDE    33.5%   VERDE     4   1   0
+  Norte            $807,000  +$137,000   100.5%   VERDE    27.0%   VERDE     2   2   1
+  Este             $551,000  -$19,000     96.4%   AMARILLO 26.0%   VERDE     3   0   1
+  Sur              $598,000  -$37,000     89.0%   AMARILLO 23.5%   AMARILLO  2   2   1
+  Oeste            $423,000  -$37,000     91.7%   AMARILLO 21.1%   AMARILLO  2   1   1
+  ---------------------------------------------------------------------------------------
+  TOTAL GENERAL  $3,287,000  +$177,000   98.9%   AMARILLO  26.3%   VERDE    13   6   4
+
+  NOTAS POR REGION:
+  * Centro  — Region lider en revenue y en ambos KPIs. Consistentemente verde todo el ano.
+  * Norte   — Segunda region por revenue total. Un registro critico puntual en Q4.
+  * Este    — Revenue bajo target anual pero recuperacion fuerte en Q3. KPI conversion verde.
+  * Sur     — Meta KPI promedio en amarillo arrastrado por inicio de ano debil.
+              Conversion anual en riesgo (23.5%, por debajo del benchmark 25%).
+  * Oeste   — Region mas debil en revenue absoluto y en KPIs. Conversion cronica bajo meta.
+              Requiere atencion prioritaria para Q1 2026.
+
+
+================================================================================
+  RESUMEN POR TRIMESTRE
+================================================================================
+
+              REGISTROS  REVENUE TOTAL  META PROM(%)  CONV PROM(%)  [G]  [A]  [R]
+  --------------------------------------------------------------------------
+  Q1 (Ene-Mar)    8      $950,000        96.1%         24.4%         3    3    1
+  Q2 (Abr-Jun)    7      $881,000        95.4%         25.2%         3    2    1
+  Q3 (Jul-Sep)    6      $878,000       104.0%         29.5%         5    1    1
+  Q4 (Oct-Dic)    4      $578,000       102.8%         27.5%         4    0    1
+  --------------------------------------------------------------------------
+  TOTAL          25    $3,287,000        98.9%         26.3%        13    6    4
+
+  NOTA: El equipo muestra mejora progresiva trimestre a trimestre en KPI de meta.
+        Q1 y Q2 son los trimestres mas debiles. Q3 es el mejor trimestre del ano.
+
+
+================================================================================
+  REGISTROS CRITICOS — DETALLE COMPLETO (KPI-META o KPI-CONV en ROJO)
+================================================================================
+
+  ! REC-005 | Feb 2025 | Q1 | Carlos Ruiz | Sur
+    Revenue: $74,000 vs Target: $120,000 | Diferencia: -$46,000 (-38.3%)
+    Leads: 58 | Deals: 8 | Meta: 61.7% [R] | Conversion: 13.8% [R]
+    Ambos KPIs en rojo. Inicio de ano critico para la region Sur.
+
+  ! REC-011 | Abr 2025 | Q2 | Miguel Torres | Este
+    Revenue: $67,000 vs Target: $140,000 | Diferencia: -$73,000 (-52.1%)
+    Leads: 45 | Deals: 6 | Meta: 47.9% [R] | Conversion: 13.3% [R]
+    PEOR REGISTRO DEL DATASET. Solo 6 deals de 45 leads en la region Este.
+
+  ! REC-017 | Jul 2025 | Q3 | Sofia Herrera | Oeste
+    Revenue: $79,000 vs Target: $115,000 | Diferencia: -$36,000 (-31.3%)
+    Leads: 52 | Deals: 7 | Meta: 68.7% [R] | Conversion: 13.5% [R]
+    Ambos KPIs en rojo. Region Oeste muestra patron de bajo desempeno recurrente.
+
+  ! REC-024 | Nov 2025 | Q4 | Ana Martinez | Norte
+    Revenue: $91,000 vs Target: $140,000 | Diferencia: -$49,000 (-35.0%)
+    Leads: 55 | Deals: 9 | Meta: 65.0% [R] | Conversion: 16.4% [A]
+    Caida abrupta para la mejor representante de la region Norte en Q1-Q2.
+
+
+================================================================================
+  TOP 5 — MEJORES REGISTROS DEL ANO (por KPI de Meta)
+================================================================================
+
+  #1  REC-018 | Ago 2025 | Laura Gomez  | Centro | Meta: 129.4% | Conv: 38.2%  [G][G]
+  #2  REC-007 | Mar 2025 | Laura Gomez  | Centro | Meta: 128.7% | Conv: 37.3%  [G][G]
+  #3  REC-025 | Dic 2025 | Carlos Ruiz  | Sur    | Meta: 127.1% | Conv: 32.0%  [G][G]
+  #4  REC-014 | Jun 2025 | Ana Martinez | Norte  | Meta: 124.4% | Conv: 35.1%  [G][G]
+  #5  REC-021 | Sep 2025 | Miguel Torres| Este   | Meta: 117.9% | Conv: 31.9%  [G][G]
+
+
+================================================================================
+  ESTADO GENERAL DEL EQUIPO — 2025
+================================================================================
+
+  Revenue total:        $3,287,000
+  Target total:         $3,110,000
+  Superavit vs target:   +$177,000  (+5.7%)
+
+  KPI Meta promedio:       98.9%    -> AMARILLO (cerca del benchmark, no lo supera)
+  KPI Conversion promedio: 26.3%    -> VERDE    (supera el benchmark de 25%)
+
+  Total leads generados:   1,788
+  Total deals cerrados:      525
+  Ratio global de conv:     29.4%   -> VERDE
+
+  Estado global: AMARILLO
+  Razon: El equipo supera el target de revenue y el benchmark de conversion,
+         pero el KPI de meta promedio (98.9%) no alcanza el 100% requerido,
+         arrastrado por 4 registros criticos concentrados en representantes
+         diferentes (1 por cada uno excepto Laura Gomez).
+
+================================================================================
+  FIN DEL REPORTE
+================================================================================
