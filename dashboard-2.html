@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Ventas 2024 | Análisis de Rendimiento del Equipo Comercial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <style>
+        :root {
+            --green: #15803d;
+            --green-light: #dcfce7;
+            --yellow: #b45309;
+            --yellow-light: #fef3c7;
+            --red: #b91c1c;
+            --red-light: #fee2e2;
+            --neutral: #374151;
+            --neutral-light: #6b7280;
+            --background: #f9fafb;
+            --white: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--neutral);
+            line-height: 1.5;
+            padding: 32px 48px;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 32px;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--neutral);
+            margin-bottom: 4px;
+        }
+        
+        .dashboard-header p {
+            color: var(--neutral-light);
+            font-size: 0.875rem;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .row-1 {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .row-2 {
+            grid-template-columns: 2fr 1fr 1fr;
+        }
+        
+        .row-3 {
+            grid-template-columns: 1fr;
+        }
+        
+        .row-4 {
+            grid-template-columns: 3fr 2fr;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--neutral);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title .badge {
+            font-size: 0.625rem;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        
+        .badge-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        
+        .badge-red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        
+        .badge-yellow {
+            background: var(--yellow-light);
+            color: var(--yellow);
+        }
+        
+        /* BAN Styles */
+        .ban-container {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .ban-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .ban-label {
+            font-size: 0.875rem;
+            color: var(--neutral-light);
+            margin-top: 4px;
+        }
+        
+        .ban-meta {
+            font-size: 0.75rem;
+            color: var(--neutral-light);
+            margin-top: 8px;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .status-green { color: var(--green); }
+        .status-yellow { color: var(--yellow); }
+        .status-red { color: var(--red); }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+            color: var(--neutral-light);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .sparkbar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .sparkbar {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .rank-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .rank-top {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        
+        .rank-bottom {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        
+        /* Chart Containers */
+        .chart-container {
+            width: 100%;
+            min-height: 200px;
+        }
+        
+        .chart-container svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Axis Styles */
+        .axis text {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            fill: var(--neutral-light);
+        }
+        
+        .axis line,
+        .axis path {
+            stroke: var(--border);
+        }
+        
+        .axis-label {
+            font-size: 11px;
+            fill: var(--neutral-light);
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--neutral-light);
+        }
+        
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: var(--neutral);
+            color: var(--white);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .tooltip.visible {
+            opacity: 1;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .row-1, .row-2, .row-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Alert Row Styles */
+        .alert-row {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .alert-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .alert-critical {
+            background: var(--red-light);
+        }
+        
+        .alert-warning {
+            background: var(--yellow-light);
+        }
+        
+        .alert-row-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .alert-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .alert-metrics {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+        }
+        
+        .metric-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--neutral-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>Panel de Rendimiento Comercial 2024</h1>
+        <p>Análisis integral del equipo de ventas | Datos actualizados a Q4-2024</p>
+    </header>
+    
+    <!-- Row 1: BAN + Top/Bottom Table -->
+    <div class="grid row-1" style="margin-bottom: 24px;">
+        <div class="card" id="viz-ban">
+            <div class="card-title">
+                El equipo supera la meta global en +6.8%
+                <span class="badge badge-green">✓ En meta</span>
+            </div>
+            <div class="ban-container">
+                <div>
+                    <div class="ban-value" id="ban-percentage">—</div>
+                    <div class="ban-label">Cumplimiento de Meta Global</div>
+                    <div class="ban-meta" id="ban-amounts">—</div>
+                </div>
+                <div id="bullet-chart" style="flex: 1;"></div>
+            </div>
+        </div>
+        
+        <div class="card" id="viz-table-top">
+            <div class="card-title">
+                María López lidera con +25% sobre meta promedio
+            </div>
+            <div class="section-title">Ranking por KPI Compuesto</div>
+            <table class="data-table" id="ranking-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Representante</th>
+                        <th style="width:100px">Score</th>
+                        <th style="width:120px">Rendimiento</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Row 2: Divergent Bars + Regional + Box Plot -->
+    <div class="grid row-2" style="margin-bottom: 24px;">
+        <div class="card">
+            <div class="card-title">
+                3 representantes sobre meta, 2 requieren atención
+            </div>
+            <div class="chart-container" id="divergent-bars"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background: var(--green);"></div> Sobre meta</div>
+                <div class="legend-item"><div class="legend-dot" style="background: var(--red);"></div> Bajo meta</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">
+                Este genera 37% de ingresos totales
+            </div>
+            <div class="chart-container" id="regional-bars"></div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">
+                Este tiene mayor captación y variabilidad
+            </div>
+            <div class="chart-container" id="boxplot"></div>
+        </div>
+    </div>
+    
+    <!-- Row 3: Line Chart -->
+    <div class="grid row-3" style="margin-bottom: 24px;">
+        <div class="card">
+            <div class="card-title">
+                Tendencia alcista sostenida: María López +23% Q4 vs Q1
+            </div>
+            <div class="chart-container" id="line-chart" style="height: 280px;"></div>
+            <div class="legend" id="line-legend"></div>
+        </div>
+    </div>
+    
+    <!-- Row 4: Scatter + Alerts -->
+    <div class="grid row-4">
+        <div class="card">
+            <div class="card-title">
+                Correlación positiva fuerte entre conversión y satisfacción (r=0.94)
+            </div>
+            <div class="chart-container" id="scatter-plot" style="height: 300px;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">
+                <span style="color: var(--red);">⚠</span> 2 representantes requieren intervención inmediata
+            </div>
+            <div class="section-title">Alertas de Bajo Desempeño</div>
+            <div id="alerts-container"></div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        const DATA = {"metadata": {"dataset": "ventas_prueba", "kpis": []}, "records": [{"id": "REP-001", "representante": "Ana Martínez", "region": "Norte", "trimestre": "Q1-2024", "ventas_real": 142500, "ventas_meta": 130000, "clientes_nuevos": 18, "tasa_conversion": 0.34, "satisfaccion_cliente": 4.5}, {"id": "REP-002", "representante": "Carlos Jiménez", "region": "Sur", "trimestre": "Q1-2024", "ventas_real": 98200, "ventas_meta": 120000, "clientes_nuevos": 11, "tasa_conversion": 0.28, "satisfaccion_cliente": 3.9}, {"id": "REP-003", "representante": "María López", "region": "Este", "trimestre": "Q1-2024", "ventas_real": 175000, "ventas_meta": 150000, "clientes_nuevos": 24, "tasa_conversion": 0.41, "satisfaccion_cliente": 4.8}, {"id": "REP-004", "representante": "Luis Rodríguez", "region": "Oeste", "trimestre": "Q1-2024", "ventas_real": 110000, "ventas_meta": 110000, "clientes_nuevos": 14, "tasa_conversion": 0.3, "satisfaccion_cliente": 4.1}, {"id": "REP-005", "representante": "Sofía Herrera", "region": "Norte", "trimestre": "Q1-2024", "ventas_real": 88000, "ventas_meta": 100000, "clientes_nuevos": 9, "tasa_conversion": 0.22, "satisfaccion_cliente": 3.7}, {"id": "REP-001", "representante": "Ana Martínez", "region": "Norte", "trimestre": "Q2-2024", "ventas_real": 158000, "ventas_meta": 140000, "clientes_nuevos": 21, "tasa_conversion": 0.37, "satisfaccion_cliente": 4.6}, {"id": "REP-002", "representante": "Carlos Jiménez", "region": "Sur", "trimestre": "Q2-2024", "ventas_real": 115000, "ventas_meta": 120000, "clientes_nuevos": 13, "tasa_conversion": 0.31, "satisfaccion_cliente": 4.0}, {"id": "REP-003", "representante": "María López", "region": "Este", "trimestre": "Q2-2024", "ventas_real": 192000, "ventas_meta": 160000, "clientes_nuevos": 27, "tasa_conversion": 0.44, "satisfaccion_cliente": 4.9}, {"id": "REP-004", "representante": "Luis Rodríguez", "region": "Oeste", "trimestre": "Q2-2024", "ventas_real": 103000, "ventas_meta": 115000, "clientes_nuevos": 12, "tasa_conversion": 0.27, "satisfaccion_cliente": 3.8}, {"id": "REP-005", "representante": "Sofía Herrera", "region": "Norte", "trimestre": "Q2-2024", "ventas_real": 97000, "ventas_meta": 100000, "clientes_nuevos": 11, "tasa_conversion": 0.25, "satisfaccion_cliente": 4.0}, {"id": "REP-001", "representante": "Ana Martínez", "region": "Norte", "trimestre": "Q3-2024", "ventas_real": 134000, "ventas_meta": 145000, "clientes_nuevos": 16, "tasa_conversion": 0.32, "satisfaccion_cliente": 4.3}, {"id": "REP-002", "representante": "Carlos Jiménez", "region": "Sur", "trimestre": "Q3-2024", "ventas_real": 128000, "ventas_meta": 125000, "clientes_nuevos": 15, "tasa_conversion": 0.33, "satisfaccion_cliente": 4.2}, {"id": "REP-003", "representante": "María López", "region": "Este", "trimestre": "Q3-2024", "ventas_real": 201000, "ventas_meta": 170000, "clientes_nuevos": 29, "tasa_conversion": 0.46, "satisfaccion_cliente": 4.9}, {"id": "REP-004", "representante": "Luis Rodríguez", "region": "Oeste", "trimestre": "Q3-2024", "ventas_real": 119000, "ventas_meta": 120000, "clientes_nuevos": 14, "tasa_conversion": 0.29, "satisfaccion_cliente": 4.0}, {"id": "REP-005", "representante": "Sofía Herrera", "region": "Norte", "trimestre": "Q3-2024", "ventas_real": 76000, "ventas_meta": 105000, "clientes_nuevos": 8, "tasa_conversion": 0.19, "satisfaccion_cliente": 3.5}, {"id": "REP-001", "representante": "Ana Martínez", "region": "Norte", "trimestre": "Q4-2024", "ventas_real": 167000, "ventas_meta": 150000, "clientes_nuevos": 23, "tasa_conversion": 0.39, "satisfaccion_cliente": 4.7}, {"id": "REP-002", "representante": "Carlos Jiménez", "region": "Sur", "trimestre": "Q4-2024", "ventas_real": 141000, "ventas_meta": 130000, "clientes_nuevos": 17, "tasa_conversion": 0.35, "satisfaccion_cliente": 4.3}, {"id": "REP-003", "representante": "María López", "region": "Este", "trimestre": "Q4-2024", "ventas_real": 215000, "ventas_meta": 180000, "clientes_nuevos": 31, "tasa_conversion": 0.48, "satisfaccion_cliente": 5.0}, {"id": "REP-004", "representante": "Luis Rodríguez", "region": "Oeste", "trimestre": "Q4-2024", "ventas_real": 108000, "ventas_meta": 125000, "clientes_nuevos": 13, "tasa_conversion": 0.26, "satisfaccion_cliente": 3.9}, {"id": "REP-005", "representante": "Sofía Herrera", "region": "Norte", "trimestre": "Q4-2024", "ventas_real": 112000, "ventas_meta": 110000, "clientes_nuevos": 14, "tasa_conversion": 0.28, "satisfaccion_cliente": 4.1}]};
+        
+        // Color palette (Okabe-Ito accessible)
+        const COLORS = {
+            green: '#15803d',
+            yellow: '#b45309',
+            red: '#b91c1c',
+            neutral: '#374151',
+            series: ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#56B4E9']
+        };
+        
+        const records = DATA.records || [];
+        
+        // Tooltip helper
+        const tooltip = d3.select('#tooltip');
+        
+        function showTooltip(event, content) {
+            tooltip.html(content)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .classed('visible', true);
+        }
+        
+        function hideTooltip() {
+            tooltip.classed('visible', false);
+        }
+        
+        // Format helpers
+        const formatCurrency = d3.format('$,.0f');
+        const formatPercent = d3.format('.1%');
+        const formatNumber = d3.format(',.0f');
+        
+        // === VIZ 1: BAN with Bullet Chart ===
+        function renderBAN() {
+            const totalReal = d3.sum(records, d => d.ventas_real || 0);
+            const totalMeta = d3.sum(records, d => d.ventas_meta || 0);
+            const cumplimiento = totalMeta > 0 ? totalReal / totalMeta : 0;
+            
+            document.getElementById('ban-percentage').textContent = formatPercent(cumplimiento);
+            document.getElementById('ban-amounts').textContent = 
+                `${formatCurrency(totalReal)} real vs ${formatCurrency(totalMeta)} meta`;
+            
+            // Bullet chart
+            const container = document.getElementById('bullet-chart');
+            const width = container.offsetWidth || 300;
+            const height = 60;
+            
+            const svg = d3.select('#bullet-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', `Bullet chart mostrando cumplimiento del ${formatPercent(cumplimiento)}`);
+            
+            const margin = {left: 10, right: 10};
+            const chartWidth = width - margin.left - margin.right;
+            
+            const scale = d3.scaleLinear()
+                .domain([0, Math.max(totalReal, totalMeta) * 1.1])
+                .range([0, chartWidth]);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, 15)`);
+            
+            // Background ranges
+            g.append('rect')
+                .attr('x', 0)
+                .attr('y', 8)
+                .attr('width', chartWidth)
+                .attr('height', 24)
+                .attr('fill', '#e5e7eb')
+                .attr('rx', 4);
+            
+            // Meta marker
+            g.append('rect')
+                .attr('x', scale(totalMeta) - 2)
+                .attr('y', 4)
+                .attr('width', 4)
+                .attr('height', 32)
+                .attr('fill', COLORS.neutral);
+            
+            // Actual bar
+            g.append('rect')
+                .attr('x', 0)
+                .attr('y', 12)
+                .attr('width', scale(totalReal))
+                .attr('height', 16)
+                .attr('fill', cumplimiento >= 1 ? COLORS.green : COLORS.red)
+                .attr('rx', 3);
+            
+            // Labels
+            g.append('text')
+                .attr('x', scale(totalMeta))
+                .attr('y', 52)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '10px')
+                .attr('fill', COLORS.neutral)
+                .text('Meta');
+        }
+        
+        // === VIZ 2: Divergent Bars ===
+        function renderDivergentBars() {
+            const repData = d3.rollup(records, 
+                v => ({
+                    real: d3.sum(v, d => d.ventas_real || 0),
+                    meta: d3.sum(v, d => d.ventas_meta || 0)
+                }),
+                d => d.representante
+            );
+            
+            const data = Array.from(repData, ([name, values]) => ({
+                name,
+                real: values.real,
+                meta: values.meta,
+                deviation: values.meta > 0 ? (values.real - values.meta) / values.meta : 0
+            })).sort((a, b) => b.deviation - a.deviation);
+            
+            const container = document.getElementById('divergent-bars');
+            const width = container.offsetWidth || 400;
+            const height = 220;
+            const margin = {top: 10, right: 60, bottom: 20, left: 120};
+            
+            const svg = d3.select('#divergent-bars')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', 'Gráfico de barras divergentes mostrando desviación de meta por representante');
+            
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const maxDev = d3.max(data, d => Math.abs(d.deviation)) || 0.3;
+            
+            const x = d3.scaleLinear()
+                .domain([-maxDev * 1.1, maxDev * 1.1])
+                .range([0, chartWidth]);
+            
+            const y = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([0, chartHeight])
+                .padding(0.3);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+            
+            // Zero line
+            g.append('line')
+                .attr('x1', x(0))
+                .attr('x2', x(0))
+                .attr('y1', 0)
+                .attr('y2', chartHeight)
+                .attr('stroke', COLORS.neutral)
+                .attr('stroke-width', 1);
+            
+            // Bars
+            g.selectAll('.bar')
+                .data(data)
+                .join('rect')
+                .attr('class', 'bar')
+                .attr('x', d => d.deviation >= 0 ? x(0) : x(d.deviation))
+                .attr('y', d => y(d.name))
+                .attr('width', d => Math.abs(x(d.deviation) - x(0)))
+                .attr('height', y.bandwidth())
+                .attr('fill', d => d.deviation >= 0 ? COLORS.green : COLORS.red)
+                .attr('rx', 3)
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `<strong>${d.name}</strong><br>Real: ${formatCurrency(d.real)}<br>Meta: ${formatCurrency(d.meta)}<br>Desviación: ${formatPercent(d.deviation)}`);
+                })
+                .on('mouseout', hideTooltip);
+            
+            // Labels - names
+            g.selectAll('.label-name')
+                .data(data)
+                .join('text')
+                .attr('class', 'label-name')
+                .attr('x', -8)
+                .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', 'end')
+                .attr('font-size', '11px')
+                .attr('fill', COLORS.neutral)
+                .text(d => d.name);
+            
+            // Labels - percentages
+            g.selectAll('.label-pct')
+                .data(data)
+                .join('text')
+                .attr('class', 'label-pct')
+                .attr('x', d => d.deviation >= 0 ? x(d.deviation) + 5 : x(d.deviation) - 5)
+                .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', d => d.deviation >= 0 ? 'start' : 'end')
+                .attr('font-size', '11px')
+                .attr('font-weight', '600')
+                .attr('fill', d => d.deviation >= 0 ? COLORS.green : COLORS.red)
+                .text(d => (d.deviation >= 0 ? '+' : '') + formatPercent(d.deviation));
+        }
+        
+        // === VIZ 3: Line Chart ===
+        function renderLineChart() {
+            const trimestres = ['Q1-2024', 'Q2-2024', 'Q3-2024', 'Q4-2024'];
+            const reps = [...new Set(records.map(d => d.representante))];
+            
+            const dataByRep = reps.map(rep => ({
+                name: rep,
+                values: trimestres.map(t => {
+                    const record = records.find(r => r.representante === rep && r.trimestre === t);
+                    return {
+                        trimestre: t,
+                        ventas: record ? record.ventas_real : 0
+                    };
+                })
+            }));
+            
+            const container = document.getElementById('line-chart');
+            const width = container.offsetWidth || 800;
+            const height = 280;
+            const margin = {top: 20, right: 120, bottom: 40, left: 70};
+            
+            const svg = d3.select('#line-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', 'Gráfico de líneas mostrando evolución trimestral de ventas por representante');
+            
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const x = d3.scalePoint()
+                .domain(trimestres)
+                .range([0, chartWidth]);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(records, d => d.ventas_real) * 1.1])
+                .range([chartHeight, 0]);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+            
+            // Axes
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(d3.axisBottom(x));
+            
+            g.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y).tickFormat(d => '$' + d3.format('.0s')(d)));
+            
+            // Grid
+            g.append('g')
+                .attr('class', 'grid')
+                .selectAll('line')
+                .data(y.ticks())
+                .join('line')
+                .attr('x1', 0)
+                .attr('x2', chartWidth)
+                .attr('y1', d => y(d))
+                .attr('y2', d => y(d))
+                .attr('stroke', '#e5e7eb')
+                .attr('stroke-dasharray', '2,2');
+            
+            const line = d3.line()
+                .x(d => x(d.trimestre))
+                .y(d => y(d.ventas))
+                .curve(d3.curveMonotoneX);
+            
+            // Lines
+            dataByRep.forEach((rep, i) => {
+                g.append('path')
+                    .datum(rep.values)
+                    .attr('fill', 'none')
+                    .attr('stroke', COLORS.series[i])
+                    .attr('stroke-width', 2.5)
+                    .attr('d', line);
+                
+                // Dots
+                g.selectAll(`.dot-${i}`)
+                    .data(rep.values)
+                    .join('circle')
+                    .attr('class', `dot-${i}`)
+                    .attr('cx', d => x(d.trimestre))
+                    .attr('cy', d => y(d.ventas))
+                    .attr('r', 4)
+                    .attr('fill', COLORS.series[i])
+                    .on('mouseover', function(event, d) {
+                        showTooltip(event, `<strong>${rep.name}</strong><br>${d.trimestre}: ${formatCurrency(d.ventas)}`);
+                    })
+                    .on('mouseout', hideTooltip);
+                
+                // End label
+                const lastValue = rep.values[rep.values.length - 1];
+                g.append('text')
+                    .attr('x', x(lastValue.trimestre) + 8)
+                    .attr('y', y(lastValue.ventas))
+                    .attr('dy', '0.35em')
+                    .attr('font-size', '10px')
+                    .attr('fill', COLORS.series[i])
+                    .text(rep.name.split(' ')[0]);
+            });
+            
+            // Legend
+            const legend = d3.select('#line-legend');
+            reps.forEach((rep, i) => {
+                legend.append('div')
+                    .attr('class', 'legend-item')
+                    .html(`<div class="legend-dot" style="background: ${COLORS.series[i]};"></div>${rep}`);
+            });
+        }
+        
+        // === VIZ 4: Regional Bars ===
+        function renderRegionalBars() {
+            const regionData = d3.rollup(records,
+                v => d3.sum(v, d => d.ventas_real || 0),
+                d => d.region
+            );
+            
+            const data = Array.from(regionData, ([region, total]) => ({region, total}))
+                .sort((a, b) => b.total - a.total);
+            
+            const container = document.getElementById('regional-bars');
+            const width = container.offsetWidth || 200;
+            const height = 200;
+            const margin = {top: 10, right: 40, bottom: 30, left: 50};
+            
+            const svg = d3.select('#regional-bars')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', 'Gráfico de barras mostrando ventas por región');
+            
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.region))
+                .range([0, chartWidth])
+                .padding(0.3);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.total) * 1.1])
+                .range([chartHeight, 0]);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+            
+            // Axes
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(d3.axisBottom(x));
+            
+            g.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y).ticks(4).tickFormat(d => '$' + d3.format('.0s')(d)));
+            
+            // Bars
+            g.selectAll('.bar')
+                .data(data)
+                .join('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d.region))
+                .attr('y', d => y(d.total))
+                .attr('width', x.bandwidth())
+                .attr('height', d => chartHeight - y(d.total))
+                .attr('fill', COLORS.series[0])
+                .attr('rx', 3)
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `<strong>${d.region}</strong><br>Total: ${formatCurrency(d.total)}`);
+                })
+                .on('mouseout', hideTooltip);
+            
+            // Value labels
+            g.selectAll('.value-label')
+                .data(data)
+                .join('text')
+                .attr('class', 'value-label')
+                .attr('x', d => x(d.region) + x.bandwidth() / 2)
+                .attr('y', d => y(d.total) - 5)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '10px')
+                .attr('font-weight', '600')
+                .attr('fill', COLORS.neutral)
+                .text(d => '$' + d3.format('.0s')(d.total));
+        }
+        
+        // === VIZ 5: Scatter Plot ===
+        function renderScatterPlot() {
+            const data = records.map(d => ({
+                name: d.representante,
+                trimestre: d.trimestre,
+                conversion: d.tasa_conversion || 0,
+                satisfaccion: d.satisfaccion_cliente || 0
+            }));
+            
+            const container = document.getElementById('scatter-plot');
+            const width = container.offsetWidth || 500;
+            const height = 300;
+            const margin = {top: 20, right: 30, bottom: 50, left: 60};
+            
+            const svg = d3.select('#scatter-plot')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', 'Scatter plot mostrando correlación entre tasa de conversión y satisfacción del cliente');
+            
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const x = d3.scaleLinear()
+                .domain([0.15, d3.max(data, d => d.conversion) * 1.05])
+                .range([0, chartWidth]);
+            
+            const y = d3.scaleLinear()
+                .domain([3.3, 5.1])
+                .range([chartHeight, 0]);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+            
+            // Axes
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(d3.axisBottom(x).tickFormat(formatPercent));
+            
+            g.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+            
+            // Axis labels
+            g.append('text')
+                .attr('x', chartWidth / 2)
+                .attr('y', chartHeight + 40)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '11px')
+                .attr('fill', COLORS.neutral)
+                .text('Tasa de Conversión');
+            
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -chartHeight / 2)
+                .attr('y', -45)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '11px')
+                .attr('fill', COLORS.neutral)
+                .text('Satisfacción Cliente');
+            
+            // Trend line
+            const xMean = d3.mean(data, d => d.conversion);
+            const yMean = d3.mean(data, d => d.satisfaccion);
+            const slope = d3.sum(data, d => (d.conversion - xMean) * (d.satisfaccion - yMean)) / 
+                          d3.sum(data, d => Math.pow(d.conversion - xMean, 2));
+            const intercept = yMean - slope * xMean;
+            
+            const xExtent = d3.extent(data, d => d.conversion);
+            g.append('line')
+                .attr('x1', x(xExtent[0]))
+                .attr('y1', y(slope * xExtent[0] + intercept))
+                .attr('x2', x(xExtent[1]))
+                .attr('y2', y(slope * xExtent[1] + intercept))
+                .attr('stroke', COLORS.neutral)
+                .attr('stroke-width', 1.5)
+                .attr('stroke-dasharray', '4,4')
+                .attr('opacity', 0.6);
+            
+            // Color by rep
+            const reps = [...new Set(data.map(d => d.name))];
+            const colorScale = d3.scaleOrdinal()
+                .domain(reps)
+                .range(COLORS.series);
+            
+            // Points
+            g.selectAll('.point')
+                .data(data)
+                .join('circle')
+                .attr('class', 'point')
+                .attr('cx', d => x(d.conversion))
+                .attr('cy', d => y(d.satisfaccion))
+                .attr('r', 6)
+                .attr('fill', d => colorScale(d.name))
+                .attr('opacity', 0.8)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('r', 8);
+                    showTooltip(event, `<strong>${d.name}</strong><br>${d.trimestre}<br>Conversión: ${formatPercent(d.conversion)}<br>Satisfacción: ${d.satisfaccion.toFixed(1)}`);
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('r', 6);
+                    hideTooltip();
+                });
+        }
+        
+        // === VIZ 6: Box Plot ===
+        function renderBoxPlot() {
+            const regions = [...new Set(records.map(d => d.region))];
+            
+            const boxData = regions.map(region => {
+                const values = records.filter(d => d.region === region).map(d => d.clientes_nuevos).sort(d3.ascending);
+                const q1 = d3.quantile(values, 0.25);
+                const median = d3.quantile(values, 0.5);
+                const q3 = d3.quantile(values, 0.75);
+                const iqr = q3 - q1;
+                const min = Math.max(d3.min(values), q1 - 1.5 * iqr);
+                const max = Math.min(d3.max(values), q3 + 1.5 * iqr);
+                return {region, q1, median, q3, min, max, values};
+            }).sort((a, b) => b.median - a.median);
+            
+            const container = document.getElementById('boxplot');
+            const width = container.offsetWidth || 200;
+            const height = 200;
+            const margin = {top: 10, right: 20, bottom: 30, left: 50};
+            
+            const svg = d3.select('#boxplot')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('role', 'img')
+                .attr('aria-label', 'Box plot mostrando distribución de clientes nuevos por región');
+            
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const y = d3.scaleBand()
+                .domain(boxData.map(d => d.region))
+                .range([0, chartHeight])
+                .padding(0.3);
+            
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(records, d => d.clientes_nuevos) * 1.1])
+                .range([0, chartWidth]);
+            
+            const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+            
+            // Axes
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(d3.axisBottom(x).ticks(5));
+            
+            g.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+            
+            const boxHeight = y.bandwidth();
+            
+            boxData.forEach(d => {
+                const yPos = y(d.region);
+                
+                // Whiskers
+                g.append('line')
+                    .attr('x1', x(d.min))
+                    .attr('x2', x(d.max))
+                    .attr('y1', yPos + boxHeight / 2)
+                    .attr('y2', yPos + boxHeight / 2)
+                    .attr('stroke', COLORS.neutral)
+                    .attr('stroke-width', 1);
+                
+                // Box
+                g.append('rect')
+                    .attr('x', x(d.q1))
+                    .attr('y', yPos)
+                    .attr('width', x(d.q3) - x(d.q1))
+                    .attr('height', boxHeight)
+                    .attr('fill', COLORS.series[2])
+                    .attr('opacity', 0.7)
+                    .attr('stroke', COLORS.series[2])
+                    .attr('rx', 2);
+                
+                // Median line
+                g.append('line')
+                    .attr('x1', x(d.median))
+                    .attr('x2', x(d.median))
+                    .attr('y1', yPos)
+                    .attr('y2', yPos + boxHeight)
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2);
+                
+                // Individual points
+                d.values.forEach(v => {
+                    g.append('circle')
+                        .attr('cx', x(v))
+                        .attr('cy', yPos + boxHeight / 2 + (Math.random() - 0.5) * boxHeight * 0.5)
+                        .attr('r', 3)
+                        .attr('fill', COLORS.neutral)
+                        .attr('opacity', 0.4);
+                });
+            });
+        }
+        
+        // === VIZ 7: Ranking Table ===
+        function renderRankingTable() {
+            const repScores = d3.rollup(records,
+                v => {
+                    const avgCumpl = d3.mean(v, d => d.ventas_meta > 0 ? d.ventas_real / d.ventas_meta : 0);
+                    const avgConv = d3.mean(v, d => d.tasa_conversion);
+                    const avgSat = d3.mean(v, d => d.satisfaccion_cliente) / 5;
+                    const totalClientes = d3.sum(v, d => d.clientes_nuevos);
+                    return {
+                        cumplimiento: avgCumpl,
+                        conversion: avgConv,
+                        satisfaccion: avgSat,
+                        clientes: totalClientes,
+                        score: (avgCumpl * 0.4 + avgConv * 0.3 + avgSat * 0.3)
+                    };
+                },
+                d => d.representante
+            );
+            
+            const data = Array.from(repScores, ([name, metrics]) => ({name, ...metrics}))
+                .sort((a, b) => b.score - a.score);
+            
+            const maxScore = d3.max(data, d => d.score);
+            
+            const tbody = document.querySelector('#ranking-table tbody');
+            
+            data.forEach((d, i) => {
+                const isTop = i < 3;
+                const isBottom = i >= data.length - 2;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <span class="rank-badge ${isTop ? 'rank-top' : (isBottom ? 'rank-bottom' : '')}">${i + 1}</span>
+                    </td>
+                    <td style="font-weight: 500;">${d.name}</td>
+                    <td>
+                        <span class="status-indicator ${d.score >= 0.35 ? 'status-green' : (d.score >= 0.28 ? 'status-yellow' : 'status-red')}">
+                            ${d.score >= 0.35 ? '✓' : (d.score >= 0.28 ? '⚠' : '✗')} ${(d.score * 100).toFixed(0)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="sparkbar-container">
+                            <div class="sparkbar" style="width: ${(d.score / maxScore) * 100}%; background: ${d.score >= 0.35 ? COLORS.green : (d.score >= 0.28 ? COLORS.yellow : COLORS.red)};"></div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // === VIZ 8: Alerts ===
+        function renderAlerts() {
+            const repMetrics = d3.rollup(records,
+                v => ({
+                    cumplimiento: d3.mean(v, d => d.ventas_meta > 0 ? d.ventas_real / d.ventas_meta : 1),
+                    conversion: d3.mean(v, d => d.tasa_conversion),
+                    satisfaccion: d3.mean(v, d => d.satisfaccion_cliente)
+                }),
+                d => d.representante
+            );
+            
+            const alerts = [];
+            repMetrics.forEach((metrics, name) => {
+                const issues = [];
+                if (metrics.cumplimiento < 0.95) issues.push('cumplimiento');
+                if (metrics.conversion < 0.30) issues.push('conversión');
+                if (metrics.satisfaccion < 4.0) issues.push('satisfacción');
+                
+                if (issues.length >= 2) {
+                    alerts.push({
+                        name,
+                        ...metrics,
+                        issues,
+                        severity: issues.length >= 3 ? 'critical' : 'warning'
+                    });
+                }
+            });
+            
+            alerts.sort((a, b) => b.issues.length - a.issues.length);
+            
+            const container = document.getElementById('alerts-container');
+            
+            if (alerts.length === 0) {
+                container.innerHTML = '<p style="color: var(--green); font-size: 0.875rem;"><span style="font-size: 1.25rem;">✓</span> Sin alertas críticas activas</p>';
+                return;
+            }
+            
+            alerts.forEach(alert => {
+                const div = document.createElement('div');
+                div.className = `alert-row alert-${alert.severity}`;
+                div.innerHTML = `
+                    <div class="alert-row-content">
+                        <span class="alert-name">
+                            ${alert.severity === 'critical' ? '✗↓' : '⚠'} ${alert.name}
+                        </span>
+                        <div class="alert-metrics">
+                            <span class="metric-item ${alert.cumplimiento < 0.95 ? 'status-red' : ''}">
+                                Meta: ${formatPercent(alert.cumplimiento)}
+                            </span>
+                            <span class="metric-item ${alert.conversion < 0.30 ? 'status-red' : ''}">
+                                Conv: ${formatPercent(alert.conversion)}
+                            </span>
+                            <span class="metric-item ${alert.satisfaccion < 4.0 ? 'status-red' : ''}">
+                                Sat: ${alert.satisfaccion.toFixed(1)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // Initialize all visualizations
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!records || records.length === 0) {
+                document.body.innerHTML = '<p style="padding: 48px; text-align: center; color: var(--red);">Error: No se encontraron datos para visualizar.</p>';
+                return;
+            }
+            
+            renderBAN();
+            renderDivergentBars();
+            renderLineChart();
+            renderRegionalBars();
+            renderScatterPlot();
+            renderBoxPlot();
+            renderRankingTable();
+            renderAlerts();
+        });
+    </script>
+</body>
+</html>
