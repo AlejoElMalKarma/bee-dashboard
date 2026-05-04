@@ -1,8 +1,9 @@
 import os
 import json
-import time
+import io
 import anthropic
 import streamlit as st
+import markdown as md_lib
 from dotenv import load_dotenv
 
 from agents import data_certifier, dataviz_selector, dashboard_architect, d3_auditor, docs_generator
@@ -17,26 +18,27 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ── Custom CSS — dark professional theme ───────────────────────────────────────
+# ── Custom CSS — light professional theme ─────────────────────────────────────
 st.markdown("""
 <style>
   /* Base */
-  [data-testid="stAppViewContainer"] { background: #0f1117; color: #e2e8f0; }
-  [data-testid="stHeader"] { background: #0f1117; }
+  [data-testid="stAppViewContainer"] { background: #ffffff; color: #111827; }
+  [data-testid="stHeader"] { background: #ffffff; border-bottom: 1px solid #e5e7eb; }
   .main .block-container { padding: 2rem 3rem; max-width: 1400px; }
 
   /* Typography */
-  h1 { color: #f8fafc; font-size: 1.75rem !important; font-weight: 700 !important; letter-spacing: -0.5px; }
-  h2 { color: #e2e8f0; font-size: 1.2rem !important; font-weight: 600 !important; }
-  h3 { color: #cbd5e1; font-size: 1rem !important; font-weight: 600 !important; }
-  p, li { color: #94a3b8; }
+  h1 { color: #111827; font-size: 1.75rem !important; font-weight: 700 !important; letter-spacing: -0.5px; }
+  h2 { color: #1f2937; font-size: 1.2rem !important; font-weight: 600 !important; }
+  h3 { color: #374151; font-size: 1rem !important; font-weight: 600 !important; }
+  p, li { color: #374151; }
+  label, .stMarkdown { color: #374151 !important; }
 
   /* Pipeline progress bar */
   .pipeline-bar {
     display: flex; align-items: center; gap: 0;
-    background: #1e2330; border-radius: 12px;
+    background: #f9fafb; border-radius: 12px;
     padding: 1rem 1.5rem; margin-bottom: 2rem;
-    border: 1px solid #2d3748;
+    border: 1px solid #e5e7eb;
   }
   .pipe-step {
     display: flex; flex-direction: column; align-items: center;
@@ -44,114 +46,116 @@ st.markdown("""
   }
   .pipe-step:not(:last-child)::after {
     content: ''; position: absolute; top: 18px; left: 60%;
-    width: 80%; height: 2px; background: #2d3748; z-index: 0;
+    width: 80%; height: 2px; background: #d1d5db; z-index: 0;
   }
-  .pipe-step.done:not(:last-child)::after { background: #3b82f6; }
+  .pipe-step.done:not(:last-child)::after { background: #2563eb; }
   .pipe-icon {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 1rem; position: relative; z-index: 1;
-    border: 2px solid #2d3748; background: #1e2330;
+    border: 2px solid #d1d5db; background: #f9fafb;
   }
-  .pipe-step.done .pipe-icon { background: #1d4ed8; border-color: #3b82f6; }
-  .pipe-step.active .pipe-icon { background: #1e40af; border-color: #60a5fa; box-shadow: 0 0 12px #3b82f680; }
-  .pipe-label { font-size: 0.65rem; color: #64748b; margin-top: 4px; text-align: center; }
-  .pipe-step.done .pipe-label { color: #94a3b8; }
-  .pipe-step.active .pipe-label { color: #93c5fd; font-weight: 600; }
+  .pipe-step.done .pipe-icon { background: #2563eb; border-color: #2563eb; }
+  .pipe-step.active .pipe-icon { background: #1d4ed8; border-color: #3b82f6; box-shadow: 0 0 10px #3b82f640; }
+  .pipe-label { font-size: 0.65rem; color: #9ca3af; margin-top: 4px; text-align: center; }
+  .pipe-step.done .pipe-label { color: #2563eb; font-weight: 600; }
+  .pipe-step.active .pipe-label { color: #1d4ed8; font-weight: 700; }
 
   /* Cards */
   .card {
-    background: #1e2330; border: 1px solid #2d3748;
+    background: #f9fafb; border: 1px solid #e5e7eb;
     border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
   }
-  .card-success { border-color: #15803d; background: #052e16; }
-  .card-warn    { border-color: #b45309; background: #1c1408; }
-  .card-error   { border-color: #991b1b; background: #1c0a0a; }
-  .card-info    { border-color: #1d4ed8; background: #0a1628; }
+  .card-success { border-color: #16a34a; background: #f0fdf4; }
+  .card-warn    { border-color: #d97706; background: #fffbeb; }
+  .card-error   { border-color: #dc2626; background: #fef2f2; }
+  .card-info    { border-color: #2563eb; background: #eff6ff; }
 
   /* Verdict badge */
   .badge {
     display: inline-block; padding: 3px 10px; border-radius: 20px;
     font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
   }
-  .badge-green  { background: #052e16; color: #4ade80; border: 1px solid #15803d; }
-  .badge-yellow { background: #1c1408; color: #fbbf24; border: 1px solid #b45309; }
-  .badge-red    { background: #1c0a0a; color: #f87171; border: 1px solid #991b1b; }
-  .badge-blue   { background: #0a1628; color: #93c5fd; border: 1px solid #1d4ed8; }
+  .badge-green  { background: #dcfce7; color: #15803d; border: 1px solid #16a34a; }
+  .badge-yellow { background: #fef3c7; color: #92400e; border: 1px solid #d97706; }
+  .badge-red    { background: #fee2e2; color: #991b1b; border: 1px solid #dc2626; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; border: 1px solid #2563eb; }
 
   /* Metric tiles */
   .metric-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0.75rem 0; }
   .metric-tile {
-    background: #0f1117; border: 1px solid #2d3748; border-radius: 8px;
+    background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;
     padding: 0.75rem 1rem; min-width: 130px; flex: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
   }
-  .metric-val { font-size: 1.6rem; font-weight: 700; color: #f1f5f9; line-height: 1; }
-  .metric-lbl { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .metric-val { font-size: 1.6rem; font-weight: 700; color: #111827; line-height: 1; }
+  .metric-lbl { font-size: 0.7rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
-  /* Issue table */
-  .issue-row { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid #1e2330; }
+  /* Issue rows */
+  .issue-row { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
   .sev-pill { padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
-  .sev-CRITICAL    { background: #1c0a0a; color: #f87171; border: 1px solid #991b1b; }
-  .sev-WARNING     { background: #1c1408; color: #fbbf24; border: 1px solid #b45309; }
-  .sev-INFO        { background: #0a1628; color: #93c5fd; border: 1px solid #1d4ed8; }
-  .sev-ADVERTENCIA { background: #1c1408; color: #fbbf24; border: 1px solid #b45309; }
-  .sev-CRÍTICO     { background: #1c0a0a; color: #f87171; border: 1px solid #991b1b; }
+  .sev-CRITICAL    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .sev-WARNING     { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .sev-INFO        { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .sev-ADVERTENCIA { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .sev-CRÍTICO     { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
   /* Viz card */
   .viz-card {
-    background: #0f1117; border: 1px solid #2d3748; border-radius: 8px;
+    background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;
     padding: 1rem; margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
   }
-  .viz-title { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; }
-  .viz-meta  { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+  .viz-title { font-size: 0.85rem; font-weight: 600; color: #111827; }
+  .viz-meta  { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
 
-  /* Score ring placeholder */
-  .score-display {
-    display: flex; align-items: center; gap: 1.5rem; padding: 1rem 0;
-  }
-  .score-number { font-size: 3.5rem; font-weight: 800; line-height: 1; }
-  .score-green  { color: #4ade80; }
-  .score-yellow { color: #fbbf24; }
-  .score-red    { color: #f87171; }
+  /* Score display */
+  .score-display { display: flex; align-items: center; gap: 1.5rem; padding: 1rem 0; }
+  .score-number  { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+  .score-green   { color: #16a34a; }
+  .score-yellow  { color: #d97706; }
+  .score-red     { color: #dc2626; }
 
   /* Buttons */
   [data-testid="stButton"] > button {
-    background: #1d4ed8; color: #fff; border: none; border-radius: 6px;
-    font-weight: 600; padding: 0.5rem 1.25rem; transition: background 0.2s;
+    background: #2563eb; color: #fff; border: none; border-radius: 6px;
+    font-weight: 600; padding: 0.5rem 1.25rem;
   }
-  [data-testid="stButton"] > button:hover { background: #1e40af; }
+  [data-testid="stButton"] > button:hover { background: #1d4ed8; }
+  button[kind="secondary"] { background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #d1d5db !important; }
 
-  /* Download button */
+  /* Download buttons */
   [data-testid="stDownloadButton"] > button {
-    background: #065f46; color: #d1fae5; border: 1px solid #059669;
-    border-radius: 6px; font-weight: 600;
+    background: #16a34a; color: #fff; border: none; border-radius: 6px; font-weight: 600;
   }
-  [data-testid="stDownloadButton"] > button:hover { background: #047857; }
+  [data-testid="stDownloadButton"] > button:hover { background: #15803d; }
+
+  /* Retry button (red) */
+  .retry-btn > button { background: #dc2626 !important; color: #fff !important; }
+  .retry-btn > button:hover { background: #b91c1c !important; }
 
   /* File uploader */
-  [data-testid="stFileUploader"] {
-    background: #1e2330; border: 1px dashed #3b82f6;
-    border-radius: 8px; padding: 1rem;
-  }
-
-  /* Spinner */
-  [data-testid="stSpinner"] > div { border-top-color: #3b82f6 !important; }
+  [data-testid="stFileUploader"] { background: #f9fafb; border-radius: 8px; }
 
   /* Expander */
-  [data-testid="stExpander"] { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; }
+  [data-testid="stExpander"] { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; }
+  [data-testid="stExpanderDetails"] { background: #ffffff; }
 
-  /* Scrollable code block */
+  /* Code preview */
   .html-preview {
-    background: #0d1117; border: 1px solid #2d3748; border-radius: 6px;
+    background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px;
     padding: 0.75rem; font-family: monospace; font-size: 0.72rem;
-    color: #a8b3c1; max-height: 300px; overflow-y: auto; white-space: pre;
+    color: #374151; max-height: 300px; overflow-y: auto; white-space: pre;
   }
 
   /* Warning banner */
   .warn-banner {
-    background: #1c1408; border: 1px solid #b45309; border-radius: 8px;
-    padding: 0.75rem 1rem; color: #fbbf24; font-size: 0.85rem; margin: 0.5rem 0;
+    background: #fffbeb; border: 1px solid #d97706; border-radius: 8px;
+    padding: 0.75rem 1rem; color: #92400e; font-size: 0.85rem; margin: 0.5rem 0;
   }
+
+  /* Divider */
+  hr { border-color: #e5e7eb; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -229,6 +233,122 @@ def reset():
     st.rerun()
 
 
+def retry_build():
+    """Vuelve al Step 3 limpiando HTML y resultado de auditoría."""
+    st.session_state["html_code"] = None
+    st.session_state["audit_result"] = None
+    st.session_state["docs_result"] = None
+    st.session_state["current_step"] = 3
+    st.session_state["error"] = None
+    st.rerun()
+
+
+def markdown_to_pdf(md_content: str) -> bytes:
+    """Convierte Markdown a PDF usando fpdf2 (puro Python, sin dependencias de sistema)."""
+    import re
+    from fpdf import FPDF
+
+    class PDF(FPDF):
+        def header(self):
+            self.set_font("Helvetica", "B", 9)
+            self.set_text_color(100, 100, 100)
+            self.cell(0, 8, "DASHBOARD DOCUMENTATION", align="R")
+            self.ln(4)
+            self.set_draw_color(200, 200, 200)
+            self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
+            self.ln(4)
+
+        def footer(self):
+            self.set_y(-12)
+            self.set_font("Helvetica", "", 8)
+            self.set_text_color(150, 150, 150)
+            self.cell(0, 8, f"Página {self.page_no()}", align="C")
+
+    pdf = PDF(orientation="P", unit="mm", format="A4")
+    pdf.set_margins(20, 20, 20)
+    pdf.set_auto_page_break(auto=True, margin=18)
+    pdf.add_page()
+
+    for line in md_content.split("\n"):
+        stripped = line.rstrip()
+
+        if stripped.startswith("### "):
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.set_text_color(55, 65, 81)
+            pdf.ln(3)
+            pdf.multi_cell(0, 6, stripped[4:])
+            pdf.ln(1)
+
+        elif stripped.startswith("## "):
+            pdf.set_font("Helvetica", "B", 14)
+            pdf.set_text_color(29, 78, 216)
+            pdf.ln(4)
+            pdf.multi_cell(0, 7, stripped[3:])
+            pdf.set_draw_color(147, 197, 253)
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.ln(3)
+
+        elif stripped.startswith("# "):
+            pdf.set_font("Helvetica", "B", 18)
+            pdf.set_text_color(17, 24, 39)
+            pdf.ln(4)
+            pdf.multi_cell(0, 9, stripped[2:])
+            pdf.set_draw_color(29, 78, 216)
+            pdf.set_line_width(0.5)
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.set_line_width(0.2)
+            pdf.ln(4)
+
+        elif stripped.startswith("> "):
+            pdf.set_font("Helvetica", "I", 9)
+            pdf.set_text_color(107, 114, 128)
+            pdf.multi_cell(0, 5, stripped[2:])
+
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(31, 41, 55)
+            clean = re.sub(r"\*\*(.+?)\*\*", r"\1", stripped[2:])
+            clean = re.sub(r"`(.+?)`", r"\1", clean)
+            pdf.multi_cell(0, 5, f"  • {clean}")
+
+        elif stripped.startswith("|"):
+            cells = [c.strip() for c in stripped.split("|")[1:-1]]
+            if all(set(c) <= set("-: ") for c in cells):
+                continue
+            col_w = max(1, (pdf.w - pdf.l_margin - pdf.r_margin) / max(len(cells), 1))
+            is_header = pdf.get_x() == pdf.l_margin and pdf.get_font()[1] == "B"
+            if pdf.get_y() > pdf.h - 30:
+                pdf.add_page()
+            for i, cell in enumerate(cells):
+                if i == 0:
+                    pdf.set_font("Helvetica", "B", 8)
+                    pdf.set_fill_color(219, 234, 254)
+                    pdf.set_text_color(30, 58, 138)
+                else:
+                    pdf.set_font("Helvetica", "", 8)
+                    pdf.set_fill_color(249, 250, 251)
+                    pdf.set_text_color(31, 41, 55)
+                pdf.cell(col_w, 5, cell[:40], border=1, fill=True)
+            pdf.ln()
+
+        elif stripped.startswith("```") or stripped == "---":
+            pass
+
+        elif stripped == "":
+            pdf.ln(2)
+
+        else:
+            clean = re.sub(r"\*\*(.+?)\*\*", r"\1", stripped)
+            clean = re.sub(r"`(.+?)`", r"\1", clean)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(31, 41, 55)
+            pdf.multi_cell(0, 5, clean)
+
+    buf = io.BytesIO()
+    pdf.output(buf)
+    return buf.getvalue()
+
+
 # ── Header ─────────────────────────────────────────────────────────────────────
 col_title, col_reset = st.columns([5, 1])
 with col_title:
@@ -259,6 +379,18 @@ uploaded_file = st.file_uploader(
 if uploaded_file and st.session_state["uploaded_data"] is None:
     try:
         raw = json.loads(uploaded_file.read().decode("utf-8"))
+        # Normaliza: si el JSON raíz es una lista, lo envuelve en la estructura esperada
+        if isinstance(raw, list):
+            raw = {"metadata": {"dataset": uploaded_file.name.replace(".json", ""), "kpis": []}, "records": raw}
+        elif not isinstance(raw, dict):
+            raise ValueError(f"Formato no soportado: se esperaba un objeto o array JSON, se recibió {type(raw).__name__}")
+        if "records" not in raw:
+            # intenta detectar la primera clave que sea una lista
+            list_keys = [k for k, v in raw.items() if isinstance(v, list)]
+            if list_keys:
+                raw = {"metadata": raw.get("metadata", {"kpis": []}), "records": raw[list_keys[0]]}
+            else:
+                raise ValueError("El JSON no contiene una clave 'records' ni ningún array de datos.")
         st.session_state["uploaded_data"] = raw
         st.session_state["current_step"] = max(st.session_state["current_step"], 1)
         st.session_state["error"] = None
@@ -502,12 +634,18 @@ if st.session_state["html_code"]:
         n_info  = sum(1 for f in flags if f.get("type") == "INFO")
 
         if verdict == "RECHAZADO":
-            st.markdown(f"""
+            st.markdown("""
             <div class="warn-banner">
-              ⚠️ El auditor emitió veredicto <strong>RECHAZADO</strong> — se recomienda revisar los flags críticos
-              antes de entregar. Puedes continuar a documentación de todas formas.
+              ⚠️ El auditor emitió veredicto <strong>RECHAZADO</strong> — el dashboard tiene issues críticos.
+              Regenera el código o continúa a documentación de todas formas.
             </div>
             """, unsafe_allow_html=True)
+            col_retry, col_continue = st.columns([1, 3])
+            with col_retry:
+                st.markdown('<div class="retry-btn">', unsafe_allow_html=True)
+                if st.button("🔄 Regenerar Dashboard", key="retry_build", use_container_width=True):
+                    retry_build()
+                st.markdown('</div>', unsafe_allow_html=True)
 
         score_cls = score_color(score)
         card_cls = "card-success" if verdict == "APROBADO" else ("card-error" if verdict == "RECHAZADO" else "card-warn")
@@ -598,10 +736,13 @@ if st.session_state["audit_result"]:
         """, unsafe_allow_html=True)
 
         st.markdown("#### 📥 Descargas")
-        col1, col2 = st.columns(2)
+        with st.spinner("Generando PDF…"):
+            pdf_bytes = markdown_to_pdf(md_content)
+
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.download_button(
-                label="⬇ Descargar dashboard.html",
+                label="⬇ dashboard.html",
                 data=html_bytes,
                 file_name="dashboard.html",
                 mime="text/html",
@@ -609,10 +750,18 @@ if st.session_state["audit_result"]:
             )
         with col2:
             st.download_button(
-                label="⬇ Descargar DASHBOARD_DOCS.md",
+                label="⬇ DASHBOARD_DOCS.md",
                 data=md_bytes,
                 file_name="DASHBOARD_DOCS.md",
                 mime="text/markdown",
+                use_container_width=True,
+            )
+        with col3:
+            st.download_button(
+                label="⬇ DASHBOARD_DOCS.pdf",
+                data=pdf_bytes,
+                file_name="DASHBOARD_DOCS.pdf",
+                mime="application/pdf",
                 use_container_width=True,
             )
 

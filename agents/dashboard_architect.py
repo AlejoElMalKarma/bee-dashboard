@@ -48,13 +48,33 @@ def run(data: dict, viz_result: dict, cert_result: dict, client: anthropic.Anthr
         for v in visualizations
     )
 
-    user_msg = f"""Genera un dashboard HTML completo y funcional para el siguiente dataset de ventas.
+    # Detecta campos dinámicamente
+    fields = list(records[0].keys()) if records else []
+    # Busca columnas categóricas para dar contexto al agente
+    categorical_summary = {}
+    for f in fields:
+        vals = [r[f] for r in records if isinstance(r.get(f), str)]
+        unique = list(set(vals))
+        if 1 < len(unique) <= 20:
+            categorical_summary[f] = unique[:10]
 
-DATASET COMPLETO (embebido en el HTML como variable JS o cargado desde data/sales_report.json):
-- {len(records)} registros, campos: {', '.join(records[0].keys()) if records else 'N/A'}
-- Representantes: {', '.join(set(r['rep_name'] for r in records))}
-- Regiones: {', '.join(set(r['region'] for r in records))}
-- Período: {records[0]['period'] if records else 'N/A'} → {records[-1]['period'] if records else 'N/A'}
+    period_hint = ""
+    for pf in ("period", "date", "fecha", "mes", "month"):
+        if pf in fields:
+            period_hint = f"- Período: {records[0].get(pf, '')} → {records[-1].get(pf, '')}"
+            break
+
+    cat_lines = "\n".join(f"- {k}: {', '.join(str(v) for v in vs)}" for k, vs in categorical_summary.items())
+
+    user_msg = f"""Genera un dashboard HTML completo y funcional para el siguiente dataset.
+
+DATASET COMPLETO:
+- {len(records)} registros
+- Campos disponibles: {', '.join(fields)}
+{period_hint}
+- Valores únicos por campo categórico:
+{cat_lines if cat_lines else '  (no se detectaron campos categóricos)'}
+- Muestra de los primeros 3 registros: {json.dumps(records[:3], ensure_ascii=False)}
 
 VISUALIZACIONES RECOMENDADAS POR EL DATAVIZ SELECTOR:
 {viz_specs}
@@ -66,17 +86,23 @@ RESULTADO DE CERTIFICACIÓN:
 - Estado: {cert_result.get('verdict', 'N/A')}
 - Issues: {len(cert_result.get('issues', []))} hallazgos
 
+DATASET COMPLETO PARA EMBEBER (usa exactamente este JSON):
+{json.dumps(data, ensure_ascii=False)}
+
 INSTRUCCIONES CRÍTICAS:
 1. Entrega UN SOLO archivo HTML completo y funcional — todo en un solo bloque, inline.
-2. Los datos deben estar embebidos como const DATA = {{...}} en el HTML para evitar problemas CORS.
-3. Usa D3.js v7 desde CDN. Carga Inter desde Google Fonts.
-4. Cada visualización debe ser un módulo IIFE que expone window.Charts.[nombre].
-5. Incluye loading state y manejo de errores.
-6. El HTML debe abrirse directamente en el browser sin servidor.
+2. OBLIGATORIO: los datos deben estar embebidos como `const DATA = <json>;` dentro de una etiqueta <script> en el HTML.
+   NO uses d3.json(), NO uses fetch(), NO hagas ninguna llamada HTTP a archivos externos para los datos.
+   El dashboard debe funcionar al abrir el archivo HTML directamente en el browser (file://) sin servidor.
+3. Usa D3.js v7 desde CDN: https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js
+4. Carga la fuente Inter desde Google Fonts.
+5. Inicializa los gráficos con `document.addEventListener('DOMContentLoaded', ...)` usando los datos de `const DATA`.
+6. Maneja arrays vacíos y valores nulos en todos los gráficos (evita división por cero).
 7. Aplica todas las reglas de diseño del system prompt.
 8. Títulos narrativos que comunican el hallazgo, no solo el contenido.
-9. Semáforos con redundancia visual (color + icono).
+9. Semáforos con redundancia visual (color + icono) — NUNCA solo color.
 10. Todos los SVG con role="img" y aria-label.
+11. Sin código truncado — el HTML debe estar completo hasta </html>.
 
 Responde SOLO con el código HTML completo, comenzando con <!DOCTYPE html> y terminando con </html>. Sin texto adicional, sin explicaciones."""
 
