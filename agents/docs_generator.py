@@ -69,15 +69,16 @@ FLAGS DE AUDITORÍA:
 MUESTRA DE DATOS (primeros 5 registros):
 {sample_records}
 
-Genera el documento Markdown con EXACTAMENTE estas 4 secciones:
+Estructura tu respuesta en DOS bloques separados por delimitadores exactos:
 
+%%MARKDOWN_START%%
 # DASHBOARD DOCUMENTATION
 > Generado: {timestamp}
 > Score de auditoría: {audit_result.get('score', 'N/A')}/100 — {audit_result.get('verdict', 'N/A')}
 > Certificación: {cert_result.get('verdict', 'N/A')}
 
 ## SECCIÓN 1 — GUÍA DE NAVEGACIÓN
-Para cada visualización ({len(visualizations)} en total), un subsección H3 con:
+Para cada visualización ({len(visualizations)} en total), una subsección H3 con:
 - **Qué muestra**: qué datos o información se visualiza
 - **Cómo leerla**: instrucciones paso a paso para interpretar
 - **Acción sugerida**: qué decisión o acción concreta tomar
@@ -102,19 +103,14 @@ Para cada visualización, subsección H3 con:
 - Campos del tooltip
 - Pregunta de negocio que responde
 - Limitaciones o caveats
+%%MARKDOWN_END%%
 
-Al final responde ÚNICAMENTE con este JSON — sin markdown fences:
+%%SUMMARY_START%%
+{{"kpis_documented": {len(kpis)}, "charts_documented": {len(visualizations)}, "issues_documented": {len(cert_result.get('issues', [])) + len(flags)}, "verdict": "{audit_result.get('verdict', 'N/A')}", "score": {audit_result.get('score', 0)}}}
+%%SUMMARY_END%%
 
-{{
-  "markdown_content": "<el documento Markdown completo como string con \\n para saltos de línea>",
-  "summary": {{
-    "kpis_documented": {len(kpis)},
-    "charts_documented": {len(visualizations)},
-    "issues_documented": {len(cert_result.get('issues', [])) + len(flags)},
-    "verdict": "{audit_result.get('verdict', 'N/A')}",
-    "score": {audit_result.get('score', 0)}
-  }}
-}}"""
+Escribe el Markdown entre %%MARKDOWN_START%% y %%MARKDOWN_END%% exactamente como texto plano.
+Escribe el JSON entre %%SUMMARY_START%% y %%SUMMARY_END%% en una sola línea."""
 
     response = client.messages.create(
         model="claude-sonnet-4-5",
@@ -122,7 +118,24 @@ Al final responde ÚNICAMENTE con este JSON — sin markdown fences:
         system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": user_msg}],
     )
-    raw = response.content[0].text.strip()
-    raw = re.sub(r"^```(?:json)?\n?", "", raw)
-    raw = re.sub(r"\n?```$", "", raw)
-    return json.loads(raw)
+    raw = response.content[0].text
+
+    # Extrae el bloque Markdown entre delimitadores
+    md_match = re.search(r"%%MARKDOWN_START%%\n?(.*?)%%MARKDOWN_END%%", raw, re.DOTALL)
+    markdown_content = md_match.group(1).strip() if md_match else raw.strip()
+
+    # Extrae el bloque JSON de summary entre delimitadores
+    summary_match = re.search(r"%%SUMMARY_START%%\n?(\{.*?\})\n?%%SUMMARY_END%%", raw, re.DOTALL)
+    if summary_match:
+        summary = json.loads(summary_match.group(1))
+    else:
+        # Fallback: construye el summary con los valores conocidos
+        summary = {
+            "kpis_documented": len(kpis),
+            "charts_documented": len(visualizations),
+            "issues_documented": len(cert_result.get("issues", [])) + len(flags),
+            "verdict": audit_result.get("verdict", "N/A"),
+            "score": audit_result.get("score", 0),
+        }
+
+    return {"markdown_content": markdown_content, "summary": summary}
