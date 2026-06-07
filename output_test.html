@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coca-Cola LATAM · Panel de Rendimiento Comercial</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400;700&family=Outfit:wght@400;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Brand & Design Tokens ───────────────────────────────────────────── */
+    :root {
+      --brand-primary:   #F40009;
+      --brand-secondary: #000000;
+      --brand-accent:    #F40009;
+      --font-display:    'Bebas Neue', sans-serif;
+      --font-mono:       'IBM Plex Mono', monospace;
+      --font-body:       'Outfit', sans-serif;
+
+      /* Design Override Tokens */
+      --bg:           #07080F;
+      --bg2:          #0D0F1C;
+      --accent:       #FF4560;
+      --teal:         #00C9A7;
+      --red:          #FF4560;
+      --border:       #1E2235;
+      --text:         #E8EAF2;
+      --text-muted:   #6b7280;
+
+      /* Layout */
+      --header-h:     72px;
+      --footer-h:     48px;
+      --gap:          16px;
+      --radius:       10px;
+      --col:          12;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    .brand-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: var(--header-h);
+      padding: 0 28px;
+      background: var(--bg2);
+      border-bottom: 2px solid var(--brand-primary);
+      box-shadow: 0 2px 24px rgba(244,0,9,.18);
+    }
+
+    .brand-header__logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .brand-header__divider {
+      width: 2px;
+      height: 36px;
+      background: var(--border);
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .brand-header__text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .brand-header__company {
+      font-family: var(--font-display);
+      font-size: 26px;
+      letter-spacing: .08em;
+      line-height: 1;
+      color: var(--brand-primary);
+    }
+
+    .brand-header__tagline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .brand-header__badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 10px;
+    }
+
+    /* ── Narrative Banner ────────────────────────────────────────────────── */
+    .narrative-banner {
+      background: linear-gradient(90deg, rgba(244,0,9,.12) 0%, rgba(13,15,28,.0) 100%);
+      border-left: 4px solid var(--brand-primary);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .narrative-banner__main {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .narrative-banner__main em {
+      color: var(--teal);
+      font-style: normal;
+    }
+
+    .narrative-banner__main strong {
+      color: var(--accent);
+    }
+
+    .narrative-banner__cta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: .04em;
+    }
+
+    .narrative-banner__cta span {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    /* ── Main Content ────────────────────────────────────────────────────── */
+    .dashboard-main {
+      padding: 20px 28px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto;
+      gap: var(--gap);
+    }
+
+    /* ── Chart Containers ────────────────────────────────────────────────── */
+    .chart-container {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+
+    .chart-container:hover {
+      border-color: rgba(244,0,9,.35);
+    }
+
+    /* Subtle top accent line */
+    .chart-container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--brand-primary) 0%, transparent 100%);
+      opacity: .5;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    /* ── Grid Placement ──────────────────────────────────────────────────── */
+
+    /* Row 1 — BANs: 6 cols each */
+    #VIZ-1 { grid-column: span 6; }
+    #VIZ-2 { grid-column: span 6; }
+
+    /* Row 2 — Horizontal bar charts side by side: 6 cols each */
+    #VIZ-3 { grid-column: span 6; }
+    #VIZ-4 { grid-column: span 6; }
+
+    /* Row 3 — Full-width temporal evolution */
+    #VIZ-5 { grid-column: span 12; }
+
+    /* Row 4 — Deep analytics */
+    #VIZ-6 { grid-column: span 7; }
+    #VIZ-7 { grid-column: span 5; }
+
+    /* Row 5 — Alerts table (collapsible) */
+    #VIZ-8 { grid-column: span 12; }
+
+    /* ── VIZ-8 Collapsible Wrapper ───────────────────────────────────────── */
+    .alerts-wrapper {
+      grid-column: span 12;
+    }
+
+    .alerts-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px 0 6px;
+    }
+
+    .alerts-toggle__label {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: .06em;
+      color: var(--accent);
+    }
+
+    .alerts-toggle__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      color: var(--accent);
+      font-size: 14px;
+      transition: transform .25s;
+    }
+
+    .alerts-toggle__icon.open {
+      transform: rotate(180deg);
+    }
+
+    .alerts-toggle__badge {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    /* ── Section Headings (used by charts internally) ────────────────────── */
+    .chart-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: .06em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .chart-subtitle {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── BAN Elements ────────────────────────────────────────────────────── */
+    .ban-value {
+      font-family: var(--font-display);
+      font-size: 64px;
+      line-height: 1;
+      letter-spacing: .02em;
+    }
+
+    .ban-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .ban-delta {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .ban-delta.positive { color: var(--teal); }
+    .ban-delta.negative { color: var(--accent); }
+
+    /* ── SVG defaults ────────────────────────────────────────────────────── */
+    svg {
+      overflow: visible;
+    }
+
+    svg text {
+      font-family: var(--font-mono);
+    }
+
+    /* ── Axis lines ──────────────────────────────────────────────────────── */
+    .axis path,
+    .axis line {
+      stroke: var(--border);
+    }
+
+    .axis text {
+      fill: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    /* ── Grid lines ──────────────────────────────────────────────────────── */
+    .grid line {
+      stroke: var(--border);
+      stroke-dasharray: 3 3;
+    }
+
+    .grid path { stroke: none; }
+
+    /* ── Tooltip override (also styled in JS) ────────────────────────────── */
+    #tooltip {
+      line-height: 1.6;
+      max-width: 240px;
+      font-family: var(--font-mono);
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+    }
+
+    #tooltip strong {
+      color: var(--teal);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ── Table (VIZ-8) ───────────────────────────────────────────────────── */
+    .risk-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .risk-table th {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 10px;
+      text-align: left;
+    }
+
+    .risk-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(30,34,53,.6);
+      vertical-align: middle;
+    }
+
+    .risk-table tr:last-child td { border-bottom: none; }
+
+    .risk-table tr:hover td {
+      background: rgba(255,69,96,.05);
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .status-pill.red    { background: rgba(255,69,96,.18);  color: #FF4560; border: 1px solid rgba(255,69,96,.4); }
+    .status-pill.yellow { background: rgba(255,193,7,.12);  color: #FFC107; border: 1px solid rgba(255,193,7,.35); }
+    .status-pill.green  { background: rgba(0,201,167,.12);  color: #00C9A7; border: 1px solid rgba(0,201,167,.35); }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    .brand-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--footer-h);
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      gap: 6px;
+    }
+
+    .brand-footer__dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      display: inline-block;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      #VIZ-1, #VIZ-2 { grid-column: span 6; }
+      #VIZ-3, #VIZ-4 { grid-column: span 12; }
+      #VIZ-6, #VIZ-7 { grid-column: span 12; }
+    }
+
+    @media (max-width: 720px) {
+      .dashboard-main { padding: 12px 14px; gap: 12px; }
+      #VIZ-1, #VIZ-2,
+      #VIZ-3, #VIZ-4,
+      #VIZ-5, #VIZ-6,
+      #VIZ-7, #VIZ-8 { grid-column: span 12; }
+
+      .brand-header { padding: 0 16px; gap: 10px; }
+      .brand-header__company { font-size: 20px; }
+      .ban-value { font-size: 44px; }
+    }
+
+    /* ── Loading placeholder ─────────────────────────────────────────────── */
+    .chart-container.loading::after {
+      content: 'Cargando…';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: .1em;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Brand Header ─────────────────────────────────────────────────── -->
+  <header class="brand-header" role="banner">
+    <img
+      class="brand-header__logo"
+      src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My..."
+      alt="Coca-Cola LATAM logo"
+    />
+    <div class="brand-header__divider" aria-hidden="true"></div>
+    <div class="brand-header__text">
+      <span class="brand-header__company">Coca-Cola LATAM</span>
+      <span class="brand-header__tagline">Panel de Rendimiento Comercial</span>
+    </div>
+    <div class="brand-header__badge">2025 · Q1 – Q4</div>
+  </header>
+
+  <!-- ── Narrative Banner ─────────────────────────────────────────────── -->
+  <section class="narrative-banner" role="note" aria-label="Resumen ejecutivo">
+    <p class="narrative-banner__main">
+      El equipo supera meta global (<em>+4.2%</em>) pero
+      <strong>3 regiones y 8 reps están en zona de riesgo</strong>
+      con baja conversión que amenaza Q2.
+    </p>
+    <p class="narrative-banner__cta">
+      ▶ Acción: <span>Reasignar 40% de leads de región Sur a Norte</span>
+      y auditar proceso de calificación en reps con conversión &lt;18% antes de cierre de Q1.
+    </p>
+  </section>
+
+  <!-- ── Dashboard Grid ───────────────────────────────────────────────── -->
+  <main class="dashboard-main" role="main" aria-label="Dashboard de rendimiento">
+
+    <!-- Row 1 · KPI BANs ──────────────────────────────────────────────── -->
+    <div id="VIZ-1" class="chart-container" style="min-height:320px"
+         role="region" aria-label="KPI Global: Cumplimiento de Meta Total"></div>
+
+    <div id="VIZ-2" class="chart-container" style="min-height:320px"
+         role="region" aria-label="KPI Global: Tasa de Conversión Promedio"></div>
+
+    <!-- Row 2 · Horizontal Bar Comparisons ────────────────────────────── -->
+    <div id="VIZ-3" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Cumplimiento de Meta por Representante"></div>
+
+    <div id="VIZ-4" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Cumplimiento de Meta por Región"></div>
+
+    <!-- Row 3 · Full-width Temporal Evolution ─────────────────────────── -->
+    <div id="VIZ-5" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Evolución Mensual: Revenue vs Target"></div>
+
+    <!-- Row 4 · Deep Analytics ────────────────────────────────────────── -->
+    <div id="VIZ-6" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Evolución Trimestral: Conversión por Región"></div>
+
+    <div id="VIZ-7" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Correlación: Leads vs Deals Closed"></div>
+
+    <!-- Row 5 · Collapsible Risk Alerts ───────────────────────────────── -->
+    <div id="VIZ-8" class="chart-container" style="min-height:320px"
+         role="region" aria-label="Alertas: Reps en Riesgo (Estado Rojo)"></div>
+
+  </main>
+
+  <!-- ── Brand Footer ─────────────────────────────────────────────────── -->
+  <footer class="brand-footer" role="contentinfo">
+    <span>Coca-Cola LATAM</span>
+    <span class="brand-footer__dot" aria-hidden="true"></span>
+    <span>Analytics powered by Beesualization</span>
+  </footer>
+
+  <!-- ── D3.js v7 ─────────────────────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js">function chartViz1(DATA) {
+  const records = (DATA.records || []).filter(d => d.revenue != null && d.target != null);
+  if (records.length === 0) {
+    d3.select("#VIZ-1").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  const totalRevenue = d3.sum(records, d => d.revenue);
+  const totalTarget = d3.sum(records, d => d.target);
+  const pct = totalTarget !== 0 ? (totalRevenue / totalTarget) * 100 : 0;
+  const delta = pct - 100;
+
+  const container = d3.select("#VIZ-1");
+
+  // BAN
+  const ban = container.append("div")
+    .style("padding", "12px 16px 4px 16px")
+    .style("font-family", "var(--font-body)");
+
+  ban.append("div")
+    .style("font-size", "12px")
+    .style("color", "#8B90A8")
+    .style("letter-spacing", "0.08em")
+    .style("text-transform", "uppercase")
+    .text("Cumplimiento Meta Consolidada");
+
+  ban.append("div")
+    .style("font-family", "var(--font-display)")
+    .style("font-size", "64px")
+    .style("line-height", "1.05")
+    .style("color", delta >= 0 ? COLOR.positive : COLOR.negative)
+    .text(pct.toFixed(1) + "%");
+
+  ban.append("div")
+    .style("font-size", "13px")
+    .style("color", delta >= 0 ? COLOR.positive : COLOR.negative)
+    .style("font-family", "var(--font-mono)")
+    .text((delta >= 0 ? "▲ +" : "▼ ") + delta.toFixed(1) + " pts vs meta · " + fmtC(totalRevenue) + " / " + fmtC(totalTarget));
+
+  // Bullet chart
+  const W = 600, H = 140;
+  const margin = {top: 30, right: 80, bottom: 40, left: 30};
+
+  const svg = container.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("width", "100%").style("height", "auto")
+    .attr("role", "img")
+    .attr("aria-label", "Bullet chart comparando revenue actual vs meta");
+
+  const maxScale = Math.max(totalRevenue, totalTarget) * 1.25;
+  const x = d3.scaleLinear().domain([0, maxScale]).range([margin.left, W - margin.right]);
+  const barY = margin.top + 10;
+  const barH = 30;
+
+  // Background range
+  svg.append("rect")
+    .attr("x", x(0)).attr("y", barY)
+    .attr("width", x(maxScale) - x(0)).attr("height", barH)
+    .attr("fill", "#8B90A8").attr("opacity", 0.15);
+
+  // Range marker at target (70% range)
+  svg.append("rect")
+    .attr("x", x(0)).attr("y", barY)
+    .attr("width", x(totalTarget * 0.7) - x(0)).attr("height", barH)
+    .attr("fill", "#8B90A8").attr("opacity", 0.10);
+
+  // Actual bar
+  svg.append("rect")
+    .attr("x", x(0)).attr("y", barY + barH/4)
+    .attr("width", x(totalRevenue) - x(0)).attr("height", barH/2)
+    .attr("fill", delta >= 0 ? COLOR.positive : COLOR.negative)
+    .attr("opacity", 0.9)
+    .on('mouseover', (event) => {
+      tooltip.style('display','block')
+        .html(`<strong>Revenue Actual</strong><br/>${fmtC(totalRevenue)}<br/>${pct.toFixed(1)}% de meta`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left', (event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  // Target line
+  svg.append("line")
+    .attr("x1", x(totalTarget)).attr("x2", x(totalTarget))
+    .attr("y1", barY - 6).attr("y2", barY + barH + 6)
+    .attr("stroke", "#E8EAF2").attr("stroke-width", 3).attr("opacity", 1.0);
+
+  // Target label below
+  svg.append("text")
+    .attr("x", x(totalTarget)).attr("y", barY + barH + 22)
+    .attr("text-anchor", "middle").attr("font-size", 10).attr("fill", "#E8EAF2")
+    .text("Meta: " + fmtC(totalTarget));
+
+  // Actual value label
+  const aboveTarget = totalRevenue > totalTarget;
+  svg.append("text")
+    .attr("x", aboveTarget ? x(totalRevenue) + 6 : x(totalRevenue) - 6)
+    .attr("y", barY + barH/2 + 4)
+    .attr("text-anchor", aboveTarget ? "start" : "end")
+    .attr("font-size", 11).attr("font-weight", "bold")
+    .attr("fill", "#E8EAF2")
+    .text(fmtC(totalRevenue));
+
+  // X axis
+  svg.append("g")
+    .attr("transform", `translate(0,${barY + barH + 6})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(fmtC))
+    .selectAll("text").attr("fill", "#8B90A8").attr("font-size", 9);
+
+  svg.append("text")
+    .attr("x", W/2).attr("y", H - 4)
+    .attr("text-anchor", "middle").attr("fill", "#8B90A8").attr("font-size", 10)
+    .text("Revenue (USD)");
+}
+
+function chartViz2(DATA) {
+  const records = (DATA.records || []).filter(d => d.kpi_conversion != null);
+  if (records.length === 0) {
+    d3.select("#VIZ-2").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  const avgConv = d3.mean(records, d => d.kpi_conversion) || 0;
+  const benchmark = 30;
+  const delta = avgConv - benchmark;
+
+  let statusColor = COLOR.positive;
+  if (avgConv < 20) statusColor = COLOR.negative;
+  else if (avgConv < 28) statusColor = "#F59E0B";
+
+  const container = d3.select("#VIZ-2");
+
+  const ban = container.append("div")
+    .style("padding", "12px 16px 4px 16px")
+    .style("font-family", "var(--font-body)");
+
+  ban.append("div")
+    .style("font-size", "12px")
+    .style("color", "#8B90A8")
+    .style("letter-spacing", "0.08em")
+    .style("text-transform", "uppercase")
+    .text("Conversión Promedio Lead → Deal");
+
+  ban.append("div")
+    .style("font-family", "var(--font-display)")
+    .style("font-size", "64px")
+    .style("line-height", "1.05")
+    .style("color", statusColor)
+    .text(avgConv.toFixed(1) + "%");
+
+  ban.append("div")
+    .style("font-size", "13px")
+    .style("color", delta >= 0 ? COLOR.positive : COLOR.negative)
+    .style("font-family", "var(--font-mono)")
+    .text((delta >= 0 ? "▲ +" : "▼ ") + delta.toFixed(1) + " pts vs benchmark " + benchmark + "%");
+
+  // Progress bar
+  const W = 600, H = 120;
+  const margin = {top: 20, right: 30, bottom: 40, left: 30};
+
+  const svg = container.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("width", "100%").style("height", "auto")
+    .attr("role", "img")
+    .attr("aria-label", "Barra de progreso de conversión vs benchmark");
+
+  const maxScale = 50;
+  const x = d3.scaleLinear().domain([0, maxScale]).range([margin.left, W - margin.right]);
+  const barY = margin.top + 10;
+  const barH = 28;
+
+  // Background
+  svg.append("rect")
+    .attr("x", x(0)).attr("y", barY)
+    .attr("width", x(maxScale) - x(0)).attr("height", barH)
+    .attr("fill", "#8B90A8").attr("opacity", 0.15)
+    .attr("rx", 4);
+
+  // Progress fill
+  svg.append("rect")
+    .attr("x", x(0)).attr("y", barY)
+    .attr("width", x(avgConv) - x(0)).attr("height", barH)
+    .attr("fill", statusColor).attr("opacity", 0.9)
+    .attr("rx", 4)
+    .on('mouseover', (event) => {
+      tooltip.style('display','block')
+        .html(`<strong>Conversión Promedio</strong><br/>${avgConv.toFixed(1)}%<br/>Benchmark: ${benchmark}%`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left', (event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  // Benchmark line
+  svg.append("line")
+    .attr("x1", x(benchmark)).attr("x2", x(benchmark))
+    .attr("y1", barY - 6).attr("y2", barY + barH + 6)
+    .attr("stroke", "#E8EAF2").attr("stroke-width", 3).attr("opacity", 1.0);
+
+  svg.append("text")
+    .attr("x", x(benchmark)).attr("y", barY + barH + 22)
+    .attr("text-anchor", "middle").attr("font-size", 10).attr("fill", "#E8EAF2")
+    .text("Benchmark: " + benchmark + "%");
+
+  // Value label
+  const aboveBench = avgConv > benchmark;
+  svg.append("text")
+    .attr("x", aboveBench ? x(avgConv) + 6 : x(avgConv) - 6)
+    .attr("y", barY + barH/2 + 4)
+    .attr("text-anchor", aboveBench ? "start" : "end")
+    .attr("font-size", 11).attr("font-weight", "bold")
+    .attr("fill", "#E8EAF2")
+    .text(avgConv.toFixed(1) + "%");
+
+  // X axis
+  svg.append("g")
+    .attr("transform", `translate(0,${barY + barH + 6})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"))
+    .selectAll("text").attr("fill", "#8B90A8").attr("font-size", 9);
+
+  svg.append("text")
+    .attr("x", W/2).attr("y", H - 4)
+    .attr("text-anchor", "middle").attr("fill", "#8B90A8").attr("font-size", 10)
+    .text("Tasa de conversión (%)");
+}
+
+function chartViz3(DATA) {
+  const records = (DATA.records || []).filter(d => d.rep_name && d.kpi_meta != null);
+  if (records.length === 0) {
+    d3.select("#VIZ-3").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  // Aggregate avg kpi_meta per rep
+  const grouped = d3.rollups(records, v => d3.mean(v, d => d.kpi_meta), d => d.rep_name)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a,b) => d3.descending(a.value, b.value));
+
+  const W = 600, H = Math.max(300, grouped.length * 32 + 100);
+  const margin = {top: 40, right: 80, bottom: 50, left: 130};
+
+  const svg = d3.select("#VIZ-3")
+    .append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio","xMidYMid meet")
+    .style("width","100%").style("height","auto")
+    .attr("role","img")
+    .attr("aria-label","Cumplimiento de meta por representante");
+
+  const xMax = d3.max(grouped, d => d.value) * 1.15;
+  const xScale = d3.scaleLinear().domain([0, xMax]).range([margin.left, W - margin.right]);
+  const yScale = d3.scaleBand().domain(grouped.map(d => d.name)).range([margin.top, H - margin.bottom]).padding(0.2);
+
+  // Title
+  svg.append("text").attr("x", W/2).attr("y", 20)
+    .attr("text-anchor","middle").attr("fill","#E8EAF2").attr("font-size",13).attr("font-weight","bold")
+    .text("Cumplimiento de meta por representante (%)");
+
+  // 100% reference line
+  svg.append("line")
+    .attr("x1", xScale(100)).attr("x2", xScale(100))
+    .attr("y1", margin.top).attr("y2", H - margin.bottom)
+    .attr("stroke", "#8B90A8").attr("stroke-dasharray","4,4").attr("stroke-width",1.5);
+
+  svg.append("text").attr("x", xScale(100)).attr("y", margin.top - 5)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",10)
+    .text("Meta 100%");
+
+  // Bars
+  svg.selectAll(".bar")
+    .data(grouped).join("rect").attr("class","bar")
+    .attr("x", margin.left)
+    .attr("y", d => yScale(d.name))
+    .attr("width", d => xScale(d.value) - margin.left)
+    .attr("height", yScale.bandwidth())
+    .attr("fill", d => d.value >= 100 ? COLOR.positive : (d.value >= 90 ? "#F4B400" : COLOR.negative))
+    .on('mouseover', (event, d) => {
+      tooltip.style('display','block')
+        .html(`<strong>${fmtS(d.name)}</strong><br/>Cumplimiento: ${fmtP(d.value)}`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left', (event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  // Value labels
+  svg.selectAll(".val-label")
+    .data(grouped).join("text").attr("class","val-label")
+    .attr("x", d => xScale(d.value) + 4)
+    .attr("y", d => yScale(d.name) + yScale.bandwidth()/2 + 4)
+    .attr("font-size",10).attr("fill","#E8EAF2")
+    .text(d => fmtP(d.value));
+
+  // Y axis
+  svg.append("g").attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(yScale))
+    .selectAll("text").attr("fill","#8B90A8").attr("font-size",10);
+
+  // X axis
+  svg.append("g").attr("transform", `translate(0,${H - margin.bottom})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d => d + "%"))
+    .selectAll("text").attr("fill","#8B90A8").attr("font-size",10);
+
+  // Axis labels
+  svg.append("text").attr("x", W/2).attr("y", H - 10)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Cumplimiento de Meta (%)");
+}
+
+function chartViz4(DATA) {
+  const records = (DATA.records || []).filter(d => d.region && d.kpi_meta != null);
+  if (records.length === 0) {
+    d3.select("#VIZ-4").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  const grouped = d3.rollups(records, v => d3.mean(v, d => d.kpi_meta), d => d.region)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a,b) => d3.descending(a.value, b.value));
+
+  const W = 600, H = Math.max(280, grouped.length * 45 + 100);
+  const margin = {top: 40, right: 80, bottom: 50, left: 100};
+
+  const svg = d3.select("#VIZ-4")
+    .append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio","xMidYMid meet")
+    .style("width","100%").style("height","auto")
+    .attr("role","img")
+    .attr("aria-label","Cumplimiento de meta por región");
+
+  const xMax = d3.max(grouped, d => d.value) * 1.15;
+  const xScale = d3.scaleLinear().domain([0, xMax]).range([margin.left, W - margin.right]);
+  const yScale = d3.scaleBand().domain(grouped.map(d => d.name)).range([margin.top, H - margin.bottom]).padding(0.25);
+
+  // Title
+  svg.append("text").attr("x", W/2).attr("y", 20)
+    .attr("text-anchor","middle").attr("fill","#E8EAF2").attr("font-size",13).attr("font-weight","bold")
+    .text("Cumplimiento de meta por región (%)");
+
+  // 100% reference
+  svg.append("line")
+    .attr("x1", xScale(100)).attr("x2", xScale(100))
+    .attr("y1", margin.top).attr("y2", H - margin.bottom)
+    .attr("stroke", "#8B90A8").attr("stroke-dasharray","4,4").attr("stroke-width",1.5);
+
+  svg.append("text").attr("x", xScale(100)).attr("y", margin.top - 5)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",10)
+    .text("Meta 100%");
+
+  // Bars
+  svg.selectAll(".bar")
+    .data(grouped).join("rect").attr("class","bar")
+    .attr("x", margin.left)
+    .attr("y", d => yScale(d.name))
+    .attr("width", d => xScale(d.value) - margin.left)
+    .attr("height", yScale.bandwidth())
+    .attr("fill", d => d.value >= 100 ? COLOR.positive : (d.value >= 90 ? "#F4B400" : COLOR.negative))
+    .on('mouseover', (event, d) => {
+      tooltip.style('display','block')
+        .html(`<strong>Región ${fmtS(d.name)}</strong><br/>Cumplimiento: ${fmtP(d.value)}`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left', (event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  svg.selectAll(".val-label")
+    .data(grouped).join("text").attr("class","val-label")
+    .attr("x", d => xScale(d.value) + 4)
+    .attr("y", d => yScale(d.name) + yScale.bandwidth()/2 + 4)
+    .attr("font-size",10).attr("fill","#E8EAF2")
+    .text(d => fmtP(d.value));
+
+  svg.append("g").attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(yScale))
+    .selectAll("text").attr("fill","#8B90A8").attr("font-size",11);
+
+  svg.append("g").attr("transform", `translate(0,${H - margin.bottom})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d => d + "%"))
+    .selectAll("text").attr("fill","#8B90A8").attr("font-size",10);
+
+  svg.append("text").attr("x", W/2).attr("y", H - 10)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Cumplimiento de Meta (%)");
+}
+
+function chartViz5(DATA) {
+  const records = (DATA.records || []).filter(d => d.period && d.revenue != null && d.target != null);
+  if (!records || records.length === 0) {
+    d3.select("#VIZ-5").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  // Aggregate by period
+  const byPeriod = d3.rollups(
+    records,
+    v => ({ revenue: d3.sum(v, d => d.revenue), target: d3.sum(v, d => d.target) }),
+    d => d.period
+  ).map(([period, vals]) => ({ period, revenue: vals.revenue, target: vals.target }))
+   .sort((a,b) => d3.ascending(a.period, b.period));
+
+  const W = 700, H = 380;
+  const margin = {top: 40, right: 40, bottom: 70, left: 75};
+
+  const svg = d3.select("#VIZ-5")
+    .append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("width","100%").style("height","auto")
+    .attr("role","img").attr("aria-label","Líneas dobles revenue vs target con área de relleno");
+
+  const xScale = d3.scalePoint()
+    .domain(byPeriod.map(d => d.period))
+    .range([margin.left, W - margin.right])
+    .padding(0.5);
+
+  const yMax = d3.max(byPeriod, d => Math.max(d.revenue, d.target)) || 1;
+  const yMin = d3.min(byPeriod, d => Math.min(d.revenue, d.target)) || 0;
+  const yScale = d3.scaleLinear()
+    .domain([yMin * 0.9, yMax * 1.1])
+    .range([H - margin.bottom, margin.top]);
+
+  // Axes
+  svg.append("g")
+    .attr("transform", `translate(0,${H - margin.bottom})`)
+    .call(d3.axisBottom(xScale))
+    .selectAll("text")
+    .attr("fill","#8B90A8")
+    .attr("transform","rotate(-35)")
+    .attr("text-anchor","end");
+
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(yScale).ticks(6).tickFormat(d => fmtC(d)))
+    .selectAll("text").attr("fill","#8B90A8");
+
+  // Axis labels
+  svg.append("text").attr("transform","rotate(-90)")
+    .attr("y", margin.left - 55).attr("x", -(H/2))
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Monto (USD)");
+  svg.append("text").attr("x", W/2).attr("y", H - 8)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Período");
+
+  // Separate areas: positive (revenue >= target) and negative
+  // Build segments using clip approach: two area generators clipped by sign
+  const areaAbove = d3.area()
+    .x(d => xScale(d.period))
+    .y0(d => yScale(d.target))
+    .y1(d => yScale(Math.max(d.revenue, d.target)))
+    .curve(d3.curveMonotoneX);
+
+  const areaBelow = d3.area()
+    .x(d => xScale(d.period))
+    .y0(d => yScale(d.target))
+    .y1(d => yScale(Math.min(d.revenue, d.target)))
+    .curve(d3.curveMonotoneX);
+
+  svg.append("path")
+    .datum(byPeriod)
+    .attr("fill", COLOR.positive)
+    .attr("opacity", 0.25)
+    .attr("d", areaAbove);
+
+  svg.append("path")
+    .datum(byPeriod)
+    .attr("fill", COLOR.negative)
+    .attr("opacity", 0.25)
+    .attr("d", areaBelow);
+
+  // Lines
+  const lineRevenue = d3.line()
+    .x(d => xScale(d.period))
+    .y(d => yScale(d.revenue))
+    .curve(d3.curveMonotoneX);
+
+  const lineTarget = d3.line()
+    .x(d => xScale(d.period))
+    .y(d => yScale(d.target))
+    .curve(d3.curveMonotoneX);
+
+  svg.append("path").datum(byPeriod)
+    .attr("fill","none").attr("stroke", COLOR.positive)
+    .attr("stroke-width", 2.5).attr("d", lineRevenue);
+
+  svg.append("path").datum(byPeriod)
+    .attr("fill","none").attr("stroke", COLOR.neutral)
+    .attr("stroke-width", 2).attr("stroke-dasharray","5,4").attr("d", lineTarget);
+
+  // Points (revenue) with tooltip + value labels
+  svg.selectAll(".pt-rev")
+    .data(byPeriod).join("circle").attr("class","pt-rev")
+    .attr("cx", d => xScale(d.period))
+    .attr("cy", d => yScale(d.revenue))
+    .attr("r", 4)
+    .attr("fill", d => d.revenue >= d.target ? COLOR.positive : COLOR.negative)
+    .on('mouseover', (event, d) => {
+      const gap = d.revenue - d.target;
+      tooltip.style('display','block').html(
+        `<strong>${fmtS(d.period)}</strong><br/>Revenue: ${fmtC(d.revenue)}<br/>Target: ${fmtC(d.target)}<br/>Brecha: ${fmtC(gap)}`
+      );
+    })
+    .on('mousemove', event => tooltip.style('left',(event.pageX+12)+'px').style('top',(event.pageY-28)+'px'))
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  svg.selectAll(".pt-tgt")
+    .data(byPeriod).join("circle").attr("class","pt-tgt")
+    .attr("cx", d => xScale(d.period))
+    .attr("cy", d => yScale(d.target))
+    .attr("r", 3)
+    .attr("fill", COLOR.neutral);
+
+  // Value labels on revenue points
+  svg.selectAll(".lbl-rev")
+    .data(byPeriod).join("text").attr("class","lbl-rev")
+    .attr("x", d => xScale(d.period))
+    .attr("y", d => yScale(d.revenue) - 8)
+    .attr("text-anchor","middle").attr("font-size",9).attr("fill","#E8EAF2")
+    .text(d => fmtC(d.revenue));
+
+  // Legend
+  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top - 25})`);
+  const items = [
+    {label:"Revenue", color:COLOR.positive},
+    {label:"Target", color:COLOR.neutral},
+    {label:"Sobre meta", color:COLOR.positive, op:0.25},
+    {label:"Bajo meta", color:COLOR.negative, op:0.25}
+  ];
+  items.forEach((s,i) => {
+    legend.append("rect").attr("x",i*110).attr("y",0).attr("width",12).attr("height",12)
+      .attr("fill",s.color).attr("opacity", s.op || 1);
+    legend.append("text").attr("x",i*110+16).attr("y",10).attr("font-size",10)
+      .attr("fill","#8B90A8").text(s.label);
+  });
+}
+
+function chartViz6(DATA) {
+  const records = (DATA.records || []).filter(d => d.quarter && d.region && d.kpi_conversion != null);
+  if (!records || records.length === 0) {
+    d3.select("#VIZ-6").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  // Aggregate avg conversion by region & quarter
+  const grouped = d3.rollups(
+    records,
+    v => d3.mean(v, d => d.kpi_conversion),
+    d => d.region,
+    d => d.quarter
+  );
+
+  const regions = grouped.map(([r]) => r).sort();
+  const quartersSet = new Set();
+  records.forEach(d => quartersSet.add(d.quarter));
+  const quarters = Array.from(quartersSet).sort();
+
+  const seriesByRegion = regions.map(region => {
+    const m = new Map(grouped.find(g => g[0] === region)[1]);
+    return {
+      region,
+      values: quarters.map(q => ({ quarter: q, value: m.get(q) != null ? m.get(q) : null }))
+        .filter(d => d.value != null)
+    };
+  });
+
+  const W = 760, H = 380;
+  const margin = {top: 40, right: 20, bottom: 50, left: 50};
+
+  const svg = d3.select("#VIZ-6")
+    .append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("width","100%").style("height","auto")
+    .attr("role","img").attr("aria-label","Small multiples conversión por región");
+
+  const n = seriesByRegion.length;
+  const cols = Math.min(n, 5);
+  const rows = Math.ceil(n / cols);
+  const cellW = (W - margin.left - margin.right) / cols;
+  const cellH = (H - margin.top - margin.bottom) / rows;
+  const pad = 12;
+
+  const globalMax = d3.max(records, d => d.kpi_conversion) || 1;
+  const globalMin = d3.min(records, d => d.kpi_conversion) || 0;
+
+  // Axis labels
+  svg.append("text").attr("transform","rotate(-90)")
+    .attr("y", 14).attr("x", -(H/2))
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Conversión (%)");
+  svg.append("text").attr("x", W/2).attr("y", H - 12)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Trimestre");
+
+  seriesByRegion.forEach((s, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const x0 = margin.left + col * cellW;
+    const y0 = margin.top + row * cellH;
+    const innerW = cellW - pad;
+    const innerH = cellH - pad - 20;
+
+    const g = svg.append("g").attr("transform", `translate(${x0},${y0})`);
+
+    // Cell background
+    g.append("rect").attr("x",0).attr("y",0).attr("width",innerW).attr("height",innerH+20)
+      .attr("fill","#1a1d2e").attr("opacity",0.3).attr("rx",4);
+
+    const xS = d3.scalePoint()
+      .domain(quarters)
+      .range([10, innerW - 10])
+      .padding(0.3);
+
+    const yS = d3.scaleLinear()
+      .domain([globalMin * 0.9, globalMax * 1.1])
+      .range([innerH, 20]);
+
+    // Determine trend
+    const first = s.values[0]?.value, last = s.values[s.values.length-1]?.value;
+    const trendUp = (last != null && first != null) ? last >= first : true;
+    const color = trendUp ? COLOR.positive : COLOR.negative;
+
+    // Title (region name)
+    g.append("text").attr("x", innerW/2).attr("y", 12)
+      .attr("text-anchor","middle").attr("font-size",11).attr("font-weight","bold")
+      .attr("fill","#E8EAF2").text(s.region);
+
+    // X axis (minimal)
+    g.append("g")
+      .attr("transform", `translate(0,${innerH})`)
+      .call(d3.axisBottom(xS).tickSize(2))
+      .selectAll("text").attr("fill","#8B90A8").attr("font-size",9);
+
+    // Y axis minimal
+    g.append("g")
+      .attr("transform", `translate(10,0)`)
+      .call(d3.axisLeft(yS).ticks(3).tickFormat(d => d.toFixed(0)+"%").tickSize(2))
+      .selectAll("text").attr("fill","#8B90A8").attr("font-size",9);
+
+    const line = d3.line()
+      .x(d => xS(d.quarter))
+      .y(d => yS(d.value))
+      .curve(d3.curveMonotoneX);
+
+    g.append("path").datum(s.values)
+      .attr("fill","none").attr("stroke", color)
+      .attr("stroke-width", 2).attr("d", line);
+
+    // Points
+    g.selectAll(".pt")
+      .data(s.values).join("circle").attr("class","pt")
+      .attr("cx", d => xS(d.quarter))
+      .attr("cy", d => yS(d.value))
+      .attr("r", 3.5)
+      .attr("fill", color)
+      .on('mouseover', (event, d) => {
+        tooltip.style('display','block').html(
+          `<strong>${fmtS(s.region)}</strong><br/>${fmtS(d.quarter)}: ${d.value.toFixed(1)}%`
+        );
+      })
+      .on('mousemove', event => tooltip.style('left',(event.pageX+12)+'px').style('top',(event.pageY-28)+'px'))
+      .on('mouseout', () => tooltip.style('display','none'));
+
+    // Value labels
+    g.selectAll(".vlbl")
+      .data(s.values).join("text").attr("class","vlbl")
+      .attr("x", d => xS(d.quarter))
+      .attr("y", d => yS(d.value) - 6)
+      .attr("text-anchor","middle").attr("font-size",8).attr("fill","#E8EAF2")
+      .text(d => d.value.toFixed(0)+"%");
+  });
+
+  // Legend
+  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top - 25})`);
+  [{label:"Tendencia ↑", color:COLOR.positive},{label:"Tendencia ↓", color:COLOR.negative}].forEach((s,i) => {
+    legend.append("rect").attr("x",i*130).attr("width",12).attr("height",12).attr("fill",s.color);
+    legend.append("text").attr("x",i*130+16).attr("y",10).attr("font-size",10).attr("fill","#8B90A8").text(s.label);
+  });
+}
+
+function chartViz7(DATA) {
+  const records = (DATA.records || []).filter(d => d.leads != null && d.deals_closed != null && d.rep_name);
+  if (records.length === 0) {
+    d3.select("#VIZ-7").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  // Aggregate by rep
+  const byRep = d3.rollups(
+    records,
+    v => ({
+      leads: d3.sum(v, d => d.leads),
+      deals: d3.sum(v, d => d.deals_closed),
+      region: v[0].region
+    }),
+    d => d.rep_name
+  ).map(([rep_name, vals]) => ({ rep_name, ...vals }));
+
+  const W = 600, H = 380;
+  const margin = {top:40, right:30, bottom:60, left:60};
+
+  const svg = d3.select("#VIZ-7")
+    .append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio","xMidYMid meet")
+    .style("width","100%").style("height","auto")
+    .attr("role","img").attr("aria-label","Scatter plot leads vs deals cerrados por representante");
+
+  const xExtent = d3.extent(byRep, d => d.leads);
+  const yExtent = d3.extent(byRep, d => d.deals);
+  const xScale = d3.scaleLinear()
+    .domain([Math.max(0, xExtent[0] - 10), xExtent[1] * 1.1])
+    .range([margin.left, W - margin.right]);
+  const yScale = d3.scaleLinear()
+    .domain([0, yExtent[1] * 1.15])
+    .range([H - margin.bottom, margin.top]);
+
+  // Axes
+  svg.append("g")
+    .attr("transform",`translate(0,${H - margin.bottom})`)
+    .call(d3.axisBottom(xScale).ticks(6))
+    .attr("color","#8B90A8");
+  svg.append("g")
+    .attr("transform",`translate(${margin.left},0)`)
+    .call(d3.axisLeft(yScale).ticks(6))
+    .attr("color","#8B90A8");
+
+  // Axis labels
+  svg.append("text").attr("x", W/2).attr("y", H - 22)
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Leads (cantidad)");
+  svg.append("text").attr("transform","rotate(-90)")
+    .attr("y", margin.left - 45).attr("x", -(H/2))
+    .attr("text-anchor","middle").attr("fill","#8B90A8").attr("font-size",11)
+    .text("Deals cerrados (cantidad)");
+
+  // Linear regression
+  const n = byRep.length;
+  const sumX = d3.sum(byRep, d => d.leads);
+  const sumY = d3.sum(byRep, d => d.deals);
+  const sumXY = d3.sum(byRep, d => d.leads * d.deals);
+  const sumX2 = d3.sum(byRep, d => d.leads * d.leads);
+  const denom = (n * sumX2 - sumX * sumX);
+  const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+  const intercept = n !== 0 ? (sumY - slope * sumX) / n : 0;
+
+  const xMin = xScale.domain()[0], xMax = xScale.domain()[1];
+  svg.append("line")
+    .attr("x1", xScale(xMin)).attr("y1", yScale(slope * xMin + intercept))
+    .attr("x2", xScale(xMax)).attr("y2", yScale(slope * xMax + intercept))
+    .attr("stroke", COLOR.neutral)
+    .attr("stroke-dasharray","5,4")
+    .attr("stroke-width",2);
+
+  // Identify outliers: high leads (>70) but low deals (<15)
+  const isAnomaly = d => d.leads > 70 && d.deals < 15;
+
+  // Points
+  svg.selectAll(".pt")
+    .data(byRep).join("circle")
+    .attr("class","pt")
+    .attr("cx", d => xScale(d.leads))
+    .attr("cy", d => yScale(d.deals))
+    .attr("r", 7)
+    .attr("fill", d => isAnomaly(d) ? COLOR.negative : COLOR.positive)
+    .attr("opacity", 0.85)
+    .attr("stroke","#0d0d0d").attr("stroke-width",1)
+    .on('mouseover', (event, d) => {
+      const eff = d.leads !== 0 ? (d.deals / d.leads * 100).toFixed(1) : "0";
+      tooltip.style('display','block')
+        .html(`<strong>${fmtS(d.rep_name)}</strong><br/>Región: ${fmtS(d.region)}<br/>Leads: ${d.leads}<br/>Deals: ${d.deals}<br/>Conv: ${eff}%`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left',(event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'));
+
+  // Labels for anomalies
+  svg.selectAll(".lbl")
+    .data(byRep.filter(isAnomaly)).join("text")
+    .attr("class","lbl")
+    .attr("x", d => xScale(d.leads) + 10)
+    .attr("y", d => yScale(d.deals) + 4)
+    .attr("fill", COLOR.negative).attr("font-size",10).attr("font-weight","bold")
+    .text(d => d.rep_name);
+
+  // Labels for all points (small)
+  svg.selectAll(".lbl-all")
+    .data(byRep.filter(d => !isAnomaly(d))).join("text")
+    .attr("class","lbl-all")
+    .attr("x", d => xScale(d.leads) + 9)
+    .attr("y", d => yScale(d.deals) - 8)
+    .attr("fill","#E8EAF2").attr("font-size",9)
+    .text(d => d.rep_name);
+
+  // Legend
+  const legend = svg.append("g").attr("transform",`translate(${margin.left},${margin.top - 25})`);
+  [
+    {label:"Rep normal", color: COLOR.positive},
+    {label:"Anomalía (>70 leads, <15 deals)", color: COLOR.negative},
+    {label:"Tendencia", color: COLOR.neutral}
+  ].forEach((s,i) => {
+    legend.append("rect").attr("x", i*180).attr("width",12).attr("height",12).attr("fill",s.color);
+    legend.append("text").attr("x", i*180 + 16).attr("y", 10).attr("font-size",10).attr("fill","#8B90A8").text(s.label);
+  });
+}
+
+function chartViz8(DATA) {
+  const records = (DATA.records || []).filter(d => d.rep_name && d.kpi_meta_status);
+  if (records.length === 0) {
+    d3.select("#VIZ-8").append("p").style("color","#8B90A8").text("Sin datos disponibles");
+    return;
+  }
+
+  // Aggregate by rep
+  const agg = d3.rollups(
+    records,
+    v => ({
+      revenue: d3.sum(v, d => d.revenue || 0),
+      target: d3.sum(v, d => d.target || 0),
+      red_count: v.filter(r => r.kpi_meta_status === "red").length,
+      yellow_count: v.filter(r => r.kpi_meta_status === "yellow").length,
+      conv_red: v.filter(r => r.kpi_conversion_status === "red").length,
+      conv_yellow: v.filter(r => r.kpi_conversion_status === "yellow").length,
+      periods: v.length
+    }),
+    d => d.rep_name
+  ).map(([rep_name, vals]) => {
+    const gap = vals.revenue - vals.target;
+    const kpi_meta_pct = vals.target !== 0 ? (vals.revenue / vals.target * 100) : 0;
+    let worstStatus = "green";
+    if (vals.red_count > 0) worstStatus = "red";
+    else if (vals.yellow_count > 0) worstStatus = "yellow";
+    let worstConv = "green";
+    if (vals.conv_red > 0) worstConv = "red";
+    else if (vals.conv_yellow > 0) worstConv = "yellow";
+    return { rep_name, ...vals, gap, kpi_meta_pct, worstStatus, worstConv };
+  });
+
+  // Filter: only those requiring intervention (red or yellow on meta)
+  const filtered = agg.filter(d => d.worstStatus === "red" || d.worstStatus === "yellow")
+    .sort((a,b) => a.gap - b.gap);
+
+  if (filtered.length === 0) {
+    d3.select("#VIZ-8").append("p").style("color","#8B90A8").text("Sin reps requiriendo intervención");
+    return;
+  }
+
+  const container = d3.select("#VIZ-8");
+
+  // Summary banner
+  const redReps = filtered.filter(d => d.worstStatus === "red");
+  const totalGapRed = d3.sum(redReps, d => d.gap);
+
+  container.append("div")
+    .style("padding","10px 12px")
+    .style("background", "rgba(255,69,96,0.12)")
+    .style("border-left",`4px solid ${COLOR.negative}`)
+    .style("border-radius","4px")
+    .style("margin-bottom","12px")
+    .style("color","#E8EAF2")
+    .style("font-size","13px")
+    .html(`<strong style="color:${COLOR.negative}">⚠ Intervención urgente:</strong> ${redReps.length} rep${redReps.length!==1?'s':''} en rojo · Gap acumulado: <strong>${fmtC(totalGapRed)}</strong>`);
+
+  // Heatmap intensity scale (red severity by gap magnitude)
+  const gaps = filtered.map(d => d.gap);
+  const minGap = d3.min(gaps);
+  const intensityScale = d3.scaleLinear()
+    .domain([minGap, 0])
+    .range([0.85, 0.15])
+    .clamp(true);
+
+  const statusColor = s => s === "red" ? COLOR.negative : s === "yellow" ? "#F5A623" : COLOR.positive;
+  const statusLabel = s => s === "red" ? "🔴 Crítico" : s === "yellow" ? "🟡 Riesgo" : "🟢 OK";
+
+  const table = container.append("table")
+    .style("width","100%")
+    .style("border-collapse","collapse")
+    .style("font-size","12px")
+    .style("color","#E8EAF2");
+
+  const headers = ["Representante","Estado Meta","Revenue","Target","Gap","% Meta","Estado Conversión"];
+  const thead = table.append("thead");
+  thead.append("tr").selectAll("th").data(headers).join("th")
+    .style("text-align","left")
+    .style("padding","8px 10px")
+    .style("border-bottom",`2px solid ${COLOR.neutral}`)
+    .style("color","#8B90A8")
+    .style("font-weight","600")
+    .style("font-size","11px")
+    .text(d => d);
+
+  const tbody = table.append("tbody");
+  const rows = tbody.selectAll("tr").data(filtered).join("tr")
+    .style("border-bottom","1px solid rgba(139,144,168,0.15)");
+
+  // Rep name
+  rows.append("td").style("padding","8px 10px").style("font-weight","600").text(d => d.rep_name);
+
+  // Status meta with heatmap intensity
+  rows.append("td").style("padding","8px 10px")
+    .each(function(d) {
+      const cell = d3.select(this);
+      const intensity = d.worstStatus === "red" ? intensityScale(d.gap) : 0.3;
+      cell.style("background", d.worstStatus === "red"
+        ? `rgba(255,69,96,${intensity})`
+        : d.worstStatus === "yellow" ? "rgba(245,166,35,0.25)" : "transparent");
+      cell.append("span")
+        .style("color", statusColor(d.worstStatus))
+        .style("font-weight","700")
+        .text(statusLabel(d.worstStatus));
+    });
+
+  // Revenue
+  rows.append("td").style("padding","8px 10px").style("font-family","var(--font-mono)").text(d => fmtC(d.revenue));
+  // Target
+  rows.append("td").style("padding","8px 10px").style("font-family","var(--font-mono)").text(d => fmtC(d.target));
+  // Gap
+  rows.append("td").style("padding","8px 10px")
+    .style("font-family","var(--font-mono)")
+    .style("font-weight","700")
+    .style("color", d => d.gap < 0 ? COLOR.negative : COLOR.positive)
+    .text(d => (d.gap >= 0 ? "+" : "") + fmtC(d.gap));
+  // % Meta
+  rows.append("td").style("padding","8px 10px")
+    .style("font-family","var(--font-mono)")
+    .text(d => d.kpi_meta_pct.toFixed(1) + "%");
+  // Conversion status
+  rows.append("td").style("padding","8px 10px")
+    .append("span")
+    .style("color", d => statusColor(d.worstConv))
+    .style("font-weight","600")
+    .text(d => statusLabel(d.worstConv));
+
+  // Tooltip on rows
+  rows
+    .on('mouseover', (event, d) => {
+      tooltip.style('display','block')
+        .html(`<strong>${fmtS(d.rep_name)}</strong><br/>Períodos analizados: ${d.periods}<br/>Períodos en rojo: ${d.red_count}<br/>Períodos en amarillo: ${d.yellow_count}<br/>Gap total: ${fmtC(d.gap)}`);
+    })
+    .on('mousemove', event => {
+      tooltip.style('left',(event.pageX+12)+'px').style('top',(event.pageY-28)+'px');
+    })
+    .on('mouseout', () => tooltip.style('display','none'))
+    .style("cursor","pointer");
+}
+</script>
+
+  <script>
+    /* ── Embedded Data ─────────────────────────────────────────────────── */
+    const DATA = {"metadata": {"dataset": "Sales Performance Report", "period": "2025-Q1 to 2025-Q4", "kpis": [{"id": "kpi_meta", "name": "Tasa de Cumplimiento de Meta", "description": "Porcentaje de ingresos reales vs. meta asignada", "formula": "(revenue / target) * 100", "unit": "%", "benchmark": 100, "status_rules": {"green": ">= 100", "yellow": ">= 80", "red": "< 80"}}, {"id": "kpi_conversion", "name": "Tasa de Conversión", "description": "Porcentaje de leads que se convierten en clientes", "formula": "(deals_closed / leads) * 100", "unit": "%", "benchmark": 25, "status_rules": {"green": ">= 25", "yellow": ">= 15", "red": "< 15"}}]}, "records": [{"id": "REC-001", "period": "2025-01", "quarter": "Q1", "rep_id": "R01", "rep_name": "Ana Martínez", "region": "Norte", "revenue": 142000, "target": 130000, "leads": 80, "deals_closed": 24, "kpi_meta": 109.2, "kpi_conversion": 30.0, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-002", "period": "2025-01", "quarter": "Q1", "rep_id": "R02", "rep_name": "Carlos Ruiz", "region": "Sur", "revenue": 98000, "target": 120000, "leads": 65, "deals_closed": 12, "kpi_meta": 81.7, "kpi_conversion": 18.5, "kpi_meta_status": "yellow", "kpi_conversion_status": "yellow", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-003", "period": "2025-01", "quarter": "Q1", "rep_id": "R03", "rep_name": "Laura Gómez", "region": "Centro", "revenue": 175000, "target": 150000, "leads": 95, "deals_closed": 31, "kpi_meta": 116.7, "kpi_conversion": 32.6, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-004", "period": "2025-02", "quarter": "Q1", "rep_id": "R01", "rep_name": "Ana Martínez", "region": "Norte", "revenue": 118000, "target": 130000, "leads": 72, "deals_closed": 19, "kpi_meta": 90.8, "kpi_conversion": 26.4, "kpi_meta_status": "yellow", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-005", "period": "2025-02", "quarter": "Q1", "rep_id": "R02", "rep_name": "Carlos Ruiz", "region": "Sur", "revenue": 74000, "target": 120000, "leads": 58, "deals_closed": 8, "kpi_meta": 61.7, "kpi_conversion": 13.8, "kpi_meta_status": "red", "kpi_conversion_status": "red", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-006", "period": "2025-02", "quarter": "Q1", "rep_id": "R04", "rep_name": "Miguel Torres", "region": "Este", "revenue": 161000, "target": 140000, "leads": 88, "deals_closed": 26, "kpi_meta": 115.0, "kpi_conversion": 29.5, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-007", "period": "2025-03", "quarter": "Q1", "rep_id": "R03", "rep_name": "Laura Gómez", "region": "Centro", "revenue": 193000, "target": 150000, "leads": 102, "deals_closed": 38, "kpi_meta": 128.7, "kpi_conversion": 37.3, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-008", "period": "2025-03", "quarter": "Q1", "rep_id": "R05", "rep_name": "Sofía Herrera", "region": "Oeste", "revenue": 89000, "target": 110000, "leads": 60, "deals_closed": 10, "kpi_meta": 80.9, "kpi_conversion": 16.7, "kpi_meta_status": "yellow", "kpi_conversion_status": "yellow", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-009", "period": "2025-04", "quarter": "Q2", "rep_id": "R01", "rep_name": "Ana Martínez", "region": "Norte", "revenue": 155000, "target": 135000, "leads": 90, "deals_closed": 28, "kpi_meta": 114.8, "kpi_conversion": 31.1, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-010", "period": "2025-04", "quarter": "Q2", "rep_id": "R02", "rep_name": "Carlos Ruiz", "region": "Sur", "revenue": 102000, "target": 125000, "leads": 70, "deals_closed": 14, "kpi_meta": 81.6, "kpi_conversion": 20.0, "kpi_meta_status": "yellow", "kpi_conversion_status": "yellow", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-011", "period": "2025-04", "quarter": "Q2", "rep_id": "R04", "rep_name": "Miguel Torres", "region": "Este", "revenue": 67000, "target": 140000, "leads": 45, "deals_closed": 6, "kpi_meta": 47.9, "kpi_conversion": 13.3, "kpi_meta_status": "red", "kpi_conversion_status": "red", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-012", "period": "2025-05", "quarter": "Q2", "rep_id": "R05", "rep_name": "Sofía Herrera", "region": "Oeste", "revenue": 131000, "target": 115000, "leads": 78, "deals_closed": 22, "kpi_meta": 113.9, "kpi_conversion": 28.2, "kpi_meta_status": "green", "kpi_conversion_status": "green", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-013", "period": "2025-05", "quarter": "Q2", "rep_id": "R03", "rep_name": "Laura Gómez", "region": "Centro", "revenue": 148000, "target": 155000, "leads": 85, "deals_closed": 20, "kpi_meta": 95.5, "kpi_conversion": 23.5, "kpi_meta_status": "yellow", "kpi_conversion_status": "yellow", "outlier_revenue": false, "outlier_target": false, "outlier_leads": false, "outlier_deals_closed": false, "outlier_kpi_meta": false, "outlier_kpi_conversion": false}, {"id": "REC-014", "period": "2025-06
+</body></html>
